@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weight/next_page.dart';
+import 'package:weight/screen/wrapper.dart';
 void main() {
   runApp(MyApp());
 }
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
             primarySwatch: Colors.amber,
       ),
-      home: MyHomePage()
+      home: Wrapper(),
     );
   }
 }
