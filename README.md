@@ -1,7 +1,23 @@
-# weight
+# fimily-meal
+家族、お店、仲良しグループを作って美味しい食事の写真をシェア。（一人でも可能）
 
-A new Flutter application.
+# サービス概要、機能
 
+- ユーザー、グループを作成。
+- 写真を投稿(グループで)
+- 投稿にたいしてアクション
+ -  いいね
+ - コメント
+ - シェア
+- おすすめグループ検索
+
+# 使用技術
+　
+- flutter(UI)
+- firebase
+ - firestore
+ - cloud function
+ - firebase authentication  
 ## Getting Started
 
 This project is a starting point for a Flutter application.
