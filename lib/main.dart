@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:weight/next_page.dart';
+import 'package:provider/provider.dart';
 import 'package:weight/screen/wrapper.dart';
+import 'package:weight/services/auth.dart';
+import 'package:weight/models/user.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -9,38 +12,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-            primarySwatch: Colors.amber,
+    // ⓵の状態を監視　
+    return StreamProvider<User>.value(
+      value: AuthService().user,
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primaryColor: Colors.amber
+        ),
+        home: Wrapper(),
       ),
-      home: Wrapper(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Achoooo!'),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.arrow_forward_ios),
-            tooltip: 'Next page',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => NextPage(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-    throw UnimplementedError();
-  }
-}
