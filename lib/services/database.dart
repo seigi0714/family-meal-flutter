@@ -11,6 +11,7 @@ class DatabaseService {
     return await brewCollection.document(userID).setData({
       'name': name,
       'strength': strength,
+      'belongingGroup': null,
       'createAt': FieldValue.serverTimestamp(),
     });
   }

@@ -71,6 +71,13 @@ class _RegisterState extends State<Register> {
                           setState((){
                             error = '登録に失敗しました';
                           });
+                        }else{
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Home(),
+                            ),
+                          );
                         }
                       }
                     },
