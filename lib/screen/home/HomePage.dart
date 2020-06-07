@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:weight/services/auth.dart';
 
 class HomePage extends StatelessWidget {
+
+  AuthService _auth = AuthService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,7 +13,21 @@ class HomePage extends StatelessWidget {
         style: TextStyle(
           color: Colors.white,
         ),
-      )),
+      ),
+        actions: <Widget>[
+          FlatButton(
+              onPressed: () {
+            return _auth.signOut();
+          },
+              child: Text(
+                  "ログアウト",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+          ),
+        ],
+      ),
       body: PostList(),
     );
   }
