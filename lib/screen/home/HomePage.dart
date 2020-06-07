@@ -91,31 +91,45 @@ class PostList extends StatelessWidget {
                           icon: Icon(Icons.star_border),
                         onPressed: (){},
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 3.0),
-                        child: IconButton(
-                            icon: Icon(Icons.share),
-                          onPressed: (){},
-                        ),
+                      Text('300'),
+                      SizedBox(
+                        width: 20.0,
+                      ),
+                      IconButton(
+                          icon: Icon(Icons.share),
+                        onPressed: (){},
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.all(0.0),
+                    padding: EdgeInsets.only(left: 10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
                         new Icon(Icons.person_pin),
-                        Padding(
-                            padding: EdgeInsets.only(left: 3.0),
-                            child: FlatButton(
-                                onPressed: null,
-                                child: Text('seigi')
-                            )
+                        new SizedBox(
+                            width: 10,
                         ),
+                        new Text("seigi"),
                       ],
-                    ))
+                    ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      new Text(
+                          '料理名',
+                      ),
+                      SizedBox(
+                        width: 10.0,
+                      ),
+                      Text("ハンバーグ")
+                    ],
+                  ),
+                )
               ],
             ),
     );
