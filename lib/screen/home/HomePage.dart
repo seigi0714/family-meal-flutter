@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:weight/services/auth.dart';
 
 class HomePage extends StatelessWidget {
-
   AuthService _auth = AuthService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-        'familyMeal',
-        style: TextStyle(
-          color: Colors.white,
+        title: Text(
+          'familyMeal',
+          style: TextStyle(
+            color: Colors.white,
+          ),
         ),
-      ),
         actions: <Widget>[
           FlatButton(
-              onPressed: () {
-            return _auth.signOut();
-          },
-              child: Text(
-                  "ログアウト",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
+            onPressed: () async {
+              await _auth.signOut();
+            },
+            child: Text(
+              "ログアウト",
+              style: TextStyle(
+                color: Colors.white,
               ),
+            ),
           ),
         ],
       ),
@@ -39,17 +39,17 @@ class PostList extends StatelessWidget {
     return ListView.builder(
       itemBuilder: (context, index) => index == 0
           ? Container(
-                padding: EdgeInsets.only(top: 16.0),
-                child: Center(
-                  child: Text(
-                      'ようこそ',
-                    style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
+              padding: EdgeInsets.only(top: 16.0),
+              child: Center(
+                child: Text(
+                  'ようこそ',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-           )
+              ),
+            )
           : Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -105,32 +105,32 @@ class PostList extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       new IconButton(
-                          icon: Icon(Icons.star_border),
-                        onPressed: (){},
+                        icon: Icon(Icons.star_border),
+                        onPressed: () {},
                       ),
                       Text('300'),
                       SizedBox(
                         width: 20.0,
                       ),
                       IconButton(
-                          icon: Icon(Icons.share),
-                        onPressed: (){},
+                        icon: Icon(Icons.share),
+                        onPressed: () {},
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.only(left: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        new Icon(Icons.person_pin),
-                        new SizedBox(
-                            width: 10,
-                        ),
-                        new Text("seigi"),
-                      ],
-                    ),
+                  padding: EdgeInsets.only(left: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      new Icon(Icons.person_pin),
+                      new SizedBox(
+                        width: 10,
+                      ),
+                      new Text("seigi"),
+                    ],
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
@@ -138,7 +138,7 @@ class PostList extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       new Text(
-                          '料理名',
+                        '料理名',
                       ),
                       SizedBox(
                         width: 10.0,

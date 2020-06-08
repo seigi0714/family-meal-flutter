@@ -4,12 +4,8 @@ import 'package:weight/screen/home/HomePage.dart';
 import 'package:weight/screen/home/UserPage.dart';
 import 'package:weight/screen/home/GroupPage.dart';
 
-class BottomNavigationBarExample extends StatefulWidget {
+class BottomNavigationBarExample extends StatelessWidget {
   @override
-  _BottomNavigationBarExampleState createState() => _BottomNavigationBarExampleState();
-}
-
-class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
   var currentTab = [
     HomePage(),
     UserPage(),
@@ -45,8 +41,9 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
   }
 }
 
-
+// ここが所謂 viewModel
 class BottomNavigationBarProvider with ChangeNotifier{
+
   int _currentIndex = 0;
 
   get currentIndex => _currentIndex;
