@@ -1,34 +1,36 @@
 import 'dart:io';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:weight/screen/group/home.dart';
 
-class Group extends ChangeNotifier{
+class Group extends ChangeNotifier {
+  final functions = CloudFunctions.instance;
+
   int currentPageIndex = 0;
 
   String currentGroupName = '';
 
   String currentGroupInfo = '';
 
- File currentImage = null;
+  File currentImage = null;
 
-  void ImageSet (image) {
+  void ImageSet(image) {
     currentImage = image;
     notifyListeners();
   }
 
-  void addGroup (name, introduction,image) {
-    // cloud functrion
-
+  void addGroup(name, text, image) {
+    functions
+        .getHttpsCallable(functionName: 'addGroup')
+        .call({name: name, text: text, image: image});
   }
 
-  void linkAddPage () {
+  void linkAddPage() {
     currentPageIndex = 1;
     notifyListeners();
   }
-  void GoHome () {
+
+  void GoHome() {
     currentPageIndex = 0;
     notifyListeners();
   }
-
 }

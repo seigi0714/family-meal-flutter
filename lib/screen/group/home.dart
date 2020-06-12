@@ -141,8 +141,7 @@ class belongGroupList extends StatelessWidget {
           ),
         ),
       ],
-    )
-    ,;
+    );
   }
 }
 
