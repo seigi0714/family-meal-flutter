@@ -80,26 +80,33 @@ class GroupAdd extends StatelessWidget {
                     height: 20.0,
                   ),
                   RaisedButton(
-                    color: Colors.amber,
-                    child: Text(
-                      'グループ作成',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                      color: Colors.amber,
+                      child: Text(
+                        'グループ作成',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    elevation: 1.0,
-                    shape: StadiumBorder(),
-                    onPressed: () async {
-                      if(_formKey.currentState.validate()) {
-                        String name =  provider.currentGroupName;
-                        String text =  provider.currentGroupInfo;
-                        File image = provider.currentImage;
-                         function.getHttpsCallable(functionName: 'addGroup')
-                                 .call({"name": name, "text": text});
-                      }
-                    },
-                  ),
+                      elevation: 1.0,
+                      shape: StadiumBorder(),
+                      onPressed: () async {
+                        if (_formKey.currentState.validate()) {
+                          String name = provider.currentGroupName;
+                          String text = provider.currentGroupInfo;
+                          File image = provider.currentImage;
+                          String imageURL = provider.profileURL;
+                          await context.read<Group>().UploadImage(image);
+                          function
+                              .getHttpsCallable(functionName: 'addGroup')
+                              .call({
+                            "name": name,
+                            "text": text,
+                            "image": imageURL
+                          });
+                          context.read<Group>().GoHome();
+                        }
+                      }),
                 ],
               ),
             ),
