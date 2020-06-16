@@ -12,13 +12,13 @@ class GroupAdd extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
-    var provider = Provider.of<Group>(context);
+    var provider = Provider.of<GroupModel>(context);
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
               icon: Icon(Icons.arrow_back_ios),
               onPressed: () {
-                context.read<Group>().GoHome();
+                context.read<GroupModel>().goHome();
               }),
           title: Text(
             'グループ作成',
@@ -48,7 +48,7 @@ class GroupAdd extends StatelessWidget {
                                 onPressed: () async {
                                   var image = await ImagePicker.pickImage(
                                       source: ImageSource.gallery);
-                                  context.read<Group>().ImageSet(image);
+                                  context.read<GroupModel>().imageSet(image);
                                 },
                                 child: Text('プロフィール画像を変更')),
                           ))
@@ -95,16 +95,15 @@ class GroupAdd extends StatelessWidget {
                           String name = provider.currentGroupName;
                           String text = provider.currentGroupInfo;
                           File image = provider.currentImage;
-                          String imageURL = provider.profileURL;
-                          await context.read<Group>().UploadImage(image);
+                          await context.read<GroupModel>().uploadImage(image);
                           function
                               .getHttpsCallable(functionName: 'addGroup')
                               .call({
                             "name": name,
                             "text": text,
-                            "image": imageURL
+                            "image": provider.profileURL
                           });
-                          context.read<Group>().GoHome();
+                          context.read<GroupModel>().goHome();
                         }
                       }),
                 ],
