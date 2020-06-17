@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weight/screen/group/group_detail.dart';
 import 'package:weight/screen/group/group_model.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/screen/group/add.dart';
@@ -19,6 +20,7 @@ class PagesGroup extends StatelessWidget {
   var groupPages = [
     GroupHome(),
     GroupAdd(),
+    GroupDetail(),
   ];
   @override
   Widget build(BuildContext context) {

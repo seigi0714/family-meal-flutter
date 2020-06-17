@@ -96,7 +96,7 @@ class GroupAdd extends StatelessWidget {
                           String text = provider.currentGroupInfo;
                           File image = provider.currentImage;
                           await context.read<GroupModel>().uploadImage(image);
-                          function
+                          await function
                               .getHttpsCallable(functionName: 'addGroup')
                               .call({
                             "name": name,

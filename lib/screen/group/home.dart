@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:weight/screen/group/group_model.dart';
 
 class GroupHome extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<GroupModel>(context);
     return ChangeNotifierProvider<GroupModel>(
       create: (_) => GroupModel()..fetchMyGroups(),
       child: Scaffold(
@@ -46,7 +48,10 @@ class GroupHome extends StatelessWidget {
                             color: Colors.grey
                           ),
                         ),
-                        onTap: ,
+                        onTap: () => {
+                           provider.currentGroup = group,
+                           provider.linkAddDetail(),
+                        }
                       ),
                     ))
                 .toList();

@@ -63,7 +63,7 @@ class PostList extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           // iconImage(group)
-                          new Container(
+                          Container(
                             height: 40.0,
                             width: 40.0,
                             decoration: new BoxDecoration(

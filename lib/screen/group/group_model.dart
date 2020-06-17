@@ -17,6 +17,8 @@ class GroupModel extends ChangeNotifier {
 
   String currentGroupName = '';
 
+  var currentGroup;
+
   String currentGroupInfo = '';
 
   String profileURL = "https://twitter.com/KboyFlutterUniv/photo";
@@ -84,8 +86,12 @@ void linkAddPage() {
   currentPageIndex = 1;
   notifyListeners();
 }
-
-void goHome() {
+void linkAddDetail() {
+      currentPageIndex = 2;
+      notifyListeners();
+}
+ void goHome() {
   currentPageIndex = 0;
+  fetchMyGroups();
   notifyListeners();
 }}
