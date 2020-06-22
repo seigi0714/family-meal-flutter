@@ -7,11 +7,10 @@ class DatabaseService {
   // usersコレクション
   final CollectionReference brewCollection = Firestore.instance.collection('users');
 
-  Future<void> updateUserData(String name, int strength) async {
+  Future<void> updateUserData(String name,String iconURL) async {
     return await brewCollection.document(userID).setData({
       'name': name,
-      'strength': strength,
-      'belongingGroup': null,
+      'iconURL': iconURL,
       'createAt': FieldValue.serverTimestamp(),
     });
   }

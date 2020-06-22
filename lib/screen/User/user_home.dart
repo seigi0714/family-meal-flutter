@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/user.dart';
+import 'package:weight/screen/group/GroupPage.dart';
+import 'package:weight/screen/home/BottomNavigation.dart';
+import 'package:weight/screen/User/user_edit.dart';
 import 'package:weight/screen/User/user_model.dart';
 
 class UserHome extends StatelessWidget {
@@ -40,7 +43,7 @@ class UserHome extends StatelessWidget {
                         height: 10,
                       ),
                       Text(
-                        user.name,
+                        model.currentUserName,
                         style: TextStyle(
                           fontSize: 20,
                         ),
@@ -59,9 +62,30 @@ class UserHome extends StatelessWidget {
                           ),
 
                           children: <Widget>[
-                            Card(child: FlatButton(child: Text('プロフィール編集'))),
                             Card(child: FlatButton(
-                                onPressed: null, child: Text('グループ'))),
+                                child: Text('プロフィール編集'),
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return UserEdit();
+                                      },
+                                    ),
+                                  );
+                                  model.setCurrentUser();
+                                })
+                            ),
+                            Card(child: FlatButton(
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return GroupPage();
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: Text('グループ'))),
                             Card(child: FlatButton(child: Text('フォロー'))),
                             Card(child: FlatButton(child: Text('お気に入り'))),
                           ],
@@ -73,7 +97,7 @@ class UserHome extends StatelessWidget {
               );
             } else {
               return Center(child: CircularProgressIndicator());
-            }// ignore: missing_return
+            } // ignore: missing_return
           },
         ),
       ),

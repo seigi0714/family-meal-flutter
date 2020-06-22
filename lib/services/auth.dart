@@ -13,15 +13,15 @@ class AuthService {
 // userのログイン状況を表す⓵
   Stream<User> get user {
     return _auth.onAuthStateChanged
-    //.map((FirebaseUser user) => _userFromFirebaseUser(user));
-        .map(_userFromFirebaseUser);
+        .map((FirebaseUser user) => _userFromFirebaseUser(user));
   }
   // email&password register
-   Future registerWithEmailAndPassword(String email, String password) async {
+   Future registerWithEmailAndPassword(String email,String name, String password) async {
        try {
          AuthResult result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
          FirebaseUser user = result.user;
-         await DatabaseService(userID: user.uid).updateUserData('', 100);
+         String iconURL = 'https://lh3.googleusercontent.com/ogw/ADGmqu-lCe3avbX9Wvvi6fuveBxkGxZ7NfPReFDdtTYy=s64-c-mo';
+         await DatabaseService(userID: user.uid).updateUserData(name,iconURL);
          return _userFromFirebaseUser(user);
        }catch (error) {
          print(error.toString());

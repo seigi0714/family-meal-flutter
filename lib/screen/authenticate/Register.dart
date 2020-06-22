@@ -48,6 +48,14 @@ class RegisterPage extends StatelessWidget {
                   ),
                   SizedBox(height: 50.0),
                   TextFormField(
+                    decoration: textInputDecoration.copyWith(hintText: 'name'),
+                    validator: (val) => val.isEmpty ? 'ニックネームを入力してください' : null,
+                    onChanged: (val) {
+                      provider.currentName = val;
+                    },
+                  ),
+                  SizedBox(height: 50.0),
+                  TextFormField(
                     obscureText: true,
                     decoration:
                     textInputDecoration.copyWith(hintText: 'password'),
@@ -75,7 +83,8 @@ class RegisterPage extends StatelessWidget {
                       if (_formKey.currentState.validate()) {
                         String email = provider.currentEmail;
                         String password = provider.currentPassword;
-                        context.read<SignInForm>().RegisterAction(email, password);
+                        String name = provider.currentName;
+                        context.read<SignInForm>().RegisterAction(email,name,password);
                       }
                     },
                   ),

@@ -6,6 +6,7 @@ class SignInForm extends ChangeNotifier {
 
   String currentEmail = "";
   String currentPassword = "";
+  String currentName = "";
   String error = "";
 
   void setCurrentEmail(String val) {
@@ -28,8 +29,8 @@ class SignInForm extends ChangeNotifier {
     }
   }
   // 新規登録処理
-  void RegisterAction(_currentEmail, _currenrPassword) async {
-    dynamic result = await _auth.registerWithEmailAndPassword(currentEmail, currentPassword);
+  void RegisterAction(_currentEmail,_currentName,_currentPassword) async {
+    dynamic result = await _auth.registerWithEmailAndPassword(currentEmail, currentName, currentPassword);
     if (result == null) {
       error = 'ログイン失敗';
       notifyListeners();
