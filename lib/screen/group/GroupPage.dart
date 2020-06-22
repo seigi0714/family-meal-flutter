@@ -9,25 +9,20 @@ import 'package:weight/screen/group/home.dart';
 class GroupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<GroupModel>(
-        create: (_) => GroupModel(),
-        child: PagesGroup(),
-    );
+    return GroupHome();
   }
 }
 
 class PagesGroup extends StatelessWidget {
   var groupPages = [
-    GroupHome(),
     GroupAdd(),
     GroupDetail(),
   ];
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<GroupModel>(context);
-    return Scaffold(
-      body: groupPages[provider.currentPageIndex],
-    );
+    final groupHome = GroupHome();
+    return groupHome;
   }
 }
 

@@ -1,23 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:weight/models/Group.dart';
 import 'package:weight/screen/group/group_model.dart';
 
 class GroupDetail extends StatelessWidget {
+  GroupDetail({this.group});
+  final Group group;
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<GroupModel>(context);
-    final group = provider.currentGroup;
     return ChangeNotifierProvider<GroupModel>(
       create: (_) => GroupModel(),
       child: Scaffold(
         appBar: AppBar(
-          leading: FlatButton(
-            onPressed: () => provider.goHome(),
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-            ),
-          ),
           title: Text(
             group.name,
             style: TextStyle(color: Colors.white),

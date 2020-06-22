@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/user.dart';
 import 'package:weight/screen/group/GroupPage.dart';
+import 'package:weight/screen/group/add.dart';
+import 'package:weight/screen/group/home.dart';
 import 'package:weight/screen/home/BottomNavigation.dart';
 import 'package:weight/screen/User/user_edit.dart';
 import 'package:weight/screen/User/user_model.dart';
