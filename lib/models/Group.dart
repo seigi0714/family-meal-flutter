@@ -1,6 +1,6 @@
 class Group {
-  Group(this.name, this.text, this.iconURL, this.userID,this.userCount,this.follower);
-
+  Group(this.groupID,this.name, this.text, this.iconURL, this.userID,this.userCount,this.follower);
+ String groupID;
   String name;
   String text;
   String iconURL;

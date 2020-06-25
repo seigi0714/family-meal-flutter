@@ -6,6 +6,7 @@ import 'package:weight/models/Group.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:weight/models/Post.dart';
 import 'package:weight/services/auth.dart';
 
 class GroupModel extends ChangeNotifier {
@@ -27,6 +28,7 @@ class GroupModel extends ChangeNotifier {
 
   List<Group> groups = [];
 
+  List<Post> posts = [];
   FirebaseStorage storage = FirebaseStorage.instance;
 
 
@@ -48,6 +50,7 @@ class GroupModel extends ChangeNotifier {
 
       final groups = await Future.wait(tasks);
       this.groups = groups;
+
       notifyListeners();
     }
 
@@ -55,9 +58,30 @@ class GroupModel extends ChangeNotifier {
     Future<Group> _fetchGroup(String groupId) async {
       final doc = await db.collection('groups').document(groupId).get();
       final group = Group(
-          doc['name'], doc['text'], doc['iconImage'], doc['GroupUser'],
+          doc.documentID,doc['name'], doc['text'], doc['iconImage'], doc['GroupUser'],
           doc['UserCount'], doc['Follower']);
         return group;
+    }
+
+    Future fetchPost(Group group)async {
+      final FirebaseUser user = await auth.currentUser();
+      final uid = user.uid;
+      final snapshots =await db.collection('groups').document(group.groupID).collection('posts').getDocuments();
+      final docIds = snapshots.documents.map((doc) => doc.documentID).toList();
+      List<Future<Post>> tasks = docIds.map((id) async {
+        return _fetchMyPost(id);
+      }).toList();
+
+      final List<Post> posts = await Future.wait(tasks);
+      this.posts = posts;
+
+      notifyListeners();
+    }
+
+    Future<Post> _fetchMyPost(String id) async {
+      final doc = await db.collection('posts').document(id).get();
+      final posts = Post(id, doc['groupID'],doc['imageURL'],doc['created'],doc['like']);
+      return posts;
     }
 
 
