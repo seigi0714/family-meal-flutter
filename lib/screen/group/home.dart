@@ -26,11 +26,11 @@ class GroupHome extends StatelessWidget {
                           leading: Container(
                             height: 60.0,
                             width: 60.0,
-                            decoration: new BoxDecoration(
+                            decoration:BoxDecoration(
                               shape: BoxShape.circle,
-                              image: new DecorationImage(
+                              image:DecorationImage(
                                   fit: BoxFit.fill,
-                                  image: new NetworkImage(group.iconURL)),
+                                  image:NetworkImage(group.iconURL)),
                             ),
                           ),
                           title: Text(
@@ -72,8 +72,7 @@ class GroupHome extends StatelessWidget {
                     },
                   ),
                 );
-                model.fetchMyGroups();
-              },
+              }
             );
           }
         ),

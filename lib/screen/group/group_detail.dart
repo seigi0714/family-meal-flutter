@@ -17,146 +17,161 @@ class GroupDetail extends StatelessWidget {
       create: (_) =>
       GroupModel()
         ..fetchPost(group),
-      child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              group.name,
-              style: TextStyle(color: Colors.white),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return PostAdd(group: group);
-                        },
-                      ),
-                    );
-                  },
-                  child: Icon(
-                    Icons.edit,
-                    color: Colors.white,
-                  ))
-            ],
-          ),
-          body: Consumer<GroupModel>(builder: (context, model, child) {
-            final List<Post> posts = model.posts;
-            final imageList = posts.map((post) => Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(post.imageURL),
-                ),
-              ),
-            )).toList();
-            return ListView(children: <Widget>[
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                height: 100,
-                width: double.infinity,
-                padding: EdgeInsets.only(
-                  left: 15,
-                ),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      Container(
-                        height: 90.0,
-                        width: 90.0,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              fit: BoxFit.fill,
-                              image: NetworkImage(group.iconURL)),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 30,
-                      ),
+      child: Consumer<GroupModel>(
+        builder: (context, model, child) {
+          return Scaffold(
+              appBar:AppBar(
+                    title: Text(
+                      group.name,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    actions: <Widget>[
                       FlatButton(
-                          onPressed: () {},
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                group.userCount.toString(),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
+                          onPressed: () async {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return PostAdd(group: group);
+                                },
                               ),
-                              Text(
-                                'フォロワー',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              )
-                            ],
-                          )),
-                      FlatButton(
-                          onPressed: () {},
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                group.follower.toString(),
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              ),
-                              Text(
-                                'メンバー',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
+                            );model.fetchPost(group);
+                          },
+                          child: Icon(
+                            Icons.edit,
+                            color: Colors.white,
                           ))
                     ],
                   ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Text(
-                group.name,
-                style: TextStyle(
-                  fontSize: 30,
-                ),
-              ),
-              Text(
-                group.text,
-                style: TextStyle(fontSize: 15, color: Colors.grey),
-              ),
-              FlatButton(
-                  onPressed: null,
-                  child: Text(
-                    'プロフィール編集',
-                    style: TextStyle(color: Colors.indigo),
-                  )),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                height: 40,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    border: Border.symmetric(
-                        vertical: BorderSide(color: Colors.grey))),
-                child: Center(
-                  child: Text(
-                    '投稿一覧',
-                    style: TextStyle(fontSize: 30, color: Colors.grey),
+              body: Consumer<GroupModel>(builder: (context, model, child) {
+                final List<Post> posts = model.posts;
+                final imageList = posts.map((post) => Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                    image: DecorationImage(
+                      image: NetworkImage(post.imageURL),
+                      fit: BoxFit.fill,
+                    ),
                   ),
-                ),
-              ),
-              Column(children: imageList)
-            ]);
-          })),
+                )).toList();
+                return ListView(children: <Widget>[
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    height: 100,
+                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                      left: 15,
+                    ),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          Container(
+                            height: 90.0,
+                            width: 90.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image: NetworkImage(group.iconURL)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 30,
+                          ),
+                          FlatButton(
+                              onPressed: () {},
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text(
+                                    group.userCount.toString(),
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  Text(
+                                    'フォロワー',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  )
+                                ],
+                              )),
+                          FlatButton(
+                              onPressed: () {},
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text(
+                                    group.follower.toString(),
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  Text(
+                                    'メンバー',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ],
+                              ))
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    group.name,
+                    style: TextStyle(
+                      fontSize: 30,
+                    ),
+                  ),
+                  Text(
+                    group.text,
+                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
+                  FlatButton(
+                      onPressed: null,
+                      child: Text(
+                        'プロフィール編集',
+                        style: TextStyle(color: Colors.indigo),
+                      )),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    height: 40,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        border: Border.symmetric(
+                            vertical: BorderSide(color: Colors.grey))),
+                    child: Center(
+                      child: Text(
+                        '投稿一覧',
+                        style: TextStyle(fontSize: 30, color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  GridView.count(
+                      shrinkWrap: true,
+                      crossAxisCount: 4 ,
+                    crossAxisSpacing: 4.0, // 縦スペース
+                    mainAxisSpacing: 4.0,
+                      children: imageList,
+                    ),
+                ]);
+              }));
+        }
+      ),
     );
   }
 }
