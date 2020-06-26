@@ -36,7 +36,7 @@ class PostModel extends ChangeNotifier{
 
   Future _fetchMyPost(String id) async {
     final doc = await db.collection('posts').document(id).get();
-    final posts = Post(id, doc['groupID'], doc['created'],doc['imageURL'], doc['like']);
+    final posts = Post(doc['name'],doc['text'],id, doc['groupID'], doc['created'],doc['imageURL'], doc['like']);
     return posts;
   }
 

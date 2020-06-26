@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/screen/group/home.dart';
-import 'package:weight/screen/home/HomePage.dart';
+import 'package:weight/screen/home/home_feed.dart';
 import 'package:weight/screen/User//UserPage.dart';
 import 'package:weight/screen/group/GroupPage.dart';
 
