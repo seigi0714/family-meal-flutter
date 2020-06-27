@@ -1,5 +1,4 @@
 
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ class HomeModel extends ChangeNotifier {
   final db = Firestore.instance;
   List<Group> belongGroup = [];
   List<Post> userPost = [];
+  bool isLike = false;
 
   Future fetchUser()async {
     final FirebaseUser user = await auth.currentUser();
@@ -24,6 +24,7 @@ class HomeModel extends ChangeNotifier {
     // ⓶　⓵で取得したグループのリストをdocumentIDのリストに変換
     final documentIds =
     snapshot.documents.map((doc) => doc.documentID).toList();
+    print(documentIds);
 
     // ⓶を使ってグループリストを作るメゾッドの配列を取得
     List<Future<Group>> tasks = documentIds.map((id) async {
@@ -54,8 +55,14 @@ class HomeModel extends ChangeNotifier {
   }
 
   Future<Post> _fetchMyPost(String id) async {
+    final user = await auth.currentUser();
     final doc = await db.collection('posts').document(id).get();
-    final post = Post(doc['title'],doc['text'],doc.documentID, doc['GroupID'],doc['imageURL'],doc['created'], doc['like']);
+    print(doc.toString());
+    final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
+    final ids = likePost.documents.map((doc) => doc.documentID);
+    final bool isLike = ids.contains(id);
+    print(isLike.toString());
+    final post = Post(name:doc['title'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike);
     return post;
   }
 
@@ -69,4 +76,26 @@ class HomeModel extends ChangeNotifier {
         doc['UserCount'], doc['Follower']);
     return group;
   }
+
+  // いいねの処理
+ Future likePost(Post post) async {
+    final user = await auth.currentUser();
+    db.collection('posts').document(post.postID).collection('likeUsers').document(user.uid).setData({
+    'user': user.uid,
+    });
+    db.collection('posts').document(post.postID).updateData({
+      'like': FieldValue.increment(1),
+    });
+    db.collection('users').document(user.uid).collection('likePost').document(post.postID).setData({
+      'postID': post.postID,
+      'group' : post.groupID,
+    });
+
+ }
+ // いいね解除したときの処理
+ Future unLikePost(Post post) async {
+    final user =await auth.currentUser();
+    db.collection('posts').document(post.postID).collection('likeUsers').document(user.uid).delete();
+    db.collection('users').document(user.uid).collection('likePost').document(post.postID).delete();
+ }
 }

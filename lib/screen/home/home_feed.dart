@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:weight/models/Post.dart';
 import 'package:weight/screen/User/user_model.dart';
 import 'package:weight/screen/home/home.dart';
 import 'package:weight/screen/home/home_model.dart';
@@ -95,31 +96,12 @@ class PostList extends StatelessWidget {
                       // postImage
                       Flexible(
                         fit: FlexFit.loose,
-                        child: new Image.network(
+                        child: Image.network(
                           post.imageURL,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            new IconButton(
-                              icon: Icon(Icons.star_border),
-                              onPressed: () {},
-                            ),
-                            Text('300'),
-                            SizedBox(
-                              width: 20.0,
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.share),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
-                      ),
+                      postActions(post: post),
                       Padding(
                         padding:
                             EdgeInsets.symmetric(vertical: 10, horizontal: 0),
@@ -138,14 +120,65 @@ class PostList extends StatelessWidget {
                       )
                     ],
                   ),
-                )).toList();
-        return
-          (posts.length == 0)
-        ? Container(child: Text('グループをフォローしよう'))
-              :  ListView(
-          children: postsCard,
-        );
+                ))
+            .toList();
+        return (posts.length == 0)
+            ? Container(child: Text('グループをフォローしよう'))
+            : ListView(
+                children: postsCard,
+              );
       }),
     );
   }
 }
+
+class postActions extends StatelessWidget {
+  postActions({this.post});
+  final Post post;
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<HomeModel>(
+      create: (_) => HomeModel()..fetchUser(),
+      child: Consumer<HomeModel>(
+        builder: (context, model, child) {
+          return Padding(
+          padding: EdgeInsets.all(0.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              (post.isLike)
+                  ? IconButton(
+                icon: Icon(Icons.star),
+                onPressed: () async {
+                  post.isLike = false;
+// いいねの処理
+                  await model.unLikePost(post);
+                  model.fetchUser();
+                },
+              )
+                  : IconButton(
+                icon: Icon(Icons.star_border),
+                onPressed: () async {
+                  post.isLike = true;
+// いいねの処理
+                  await model.likePost(post);
+                  model.fetchUser();
+                },
+              ),
+              Text('300'),
+              SizedBox(
+                width: 20.0,
+              ),
+              IconButton(
+                icon: Icon(Icons.share),
+                onPressed: () {},
+              ),
+            ],
+          ),
+    );
+        }
+      ),
+    );
+  }
+}
+
