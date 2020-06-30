@@ -119,14 +119,7 @@ class PostAdd extends StatelessWidget {
                                       String text = model.currentPostInfo;
                                       File image = model.currentImage;
                                       await model.uploadImage(image);
-                                      await function
-                                          .getHttpsCallable(functionName: 'addPost')
-                                          .call({
-                                        "title": name,
-                                        "text": text,
-                                        "image": model.profileURL,
-                                        "groupID": group.groupID
-                                      });
+                                      await model.addPost(name,text,model.profileURL,group.groupID);
                                       Navigator.of(context).pop();
                                     }
                                   }),

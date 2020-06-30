@@ -64,43 +64,7 @@ class PostList extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Padding(
-          padding:
-          const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  // iconImage(group)
-                  Container(
-                    height: 40.0,
-                    width: 40.0,
-                    decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: new DecorationImage(
-                          fit: BoxFit.fill,
-                          image: new NetworkImage(
-                              "https://so-sha.co.jp/cont/wp-content/themes/daishin-sosha/img/photo/menu/family/img02.png")),
-                    ),
-                  ),
-                  new SizedBox(
-                    width: 10.0,
-                  ),
-                  // groupname
-                  new Text(
-                    "中村家",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-              new IconButton(
-                icon: Icon(Icons.more_vert),
-                onPressed: null,
-              )
-            ],
-          ),
-        ),
+        PostHeader(groupID: post.groupID),
         // postImage
         Flexible(
           fit: FlexFit.loose,
@@ -132,6 +96,62 @@ class PostList extends StatelessWidget {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       children: postList,
+    );
+  }
+}
+class PostHeader extends StatelessWidget {
+  PostHeader({this.groupID});
+  final String groupID;
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<HomeModel>(
+      create: (_) => HomeModel()..getGroup(groupID),
+      child: Consumer<HomeModel>(
+          builder: (context,model,child) {
+            final group = model.group;
+            return
+              (model.loading)
+              ?
+              Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      // iconImage(group)
+                      Container(
+                        height: 40.0,
+                        width: 40.0,
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: new DecorationImage(
+                              fit: BoxFit.fill,
+                              image: new NetworkImage(
+                                  group.iconURL
+                              )),
+                        ),
+                      ),
+                      new SizedBox(
+                        width: 10.0,
+                      ),
+                      // groupname
+                      new Text(
+                        group.name,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    ],
+                  ),
+                  new IconButton(
+                    icon: Icon(Icons.more_vert),
+                    onPressed: null,
+                  )
+                ],
+              ),
+            )
+            : Container();
+          }
+      ),
     );
   }
 }

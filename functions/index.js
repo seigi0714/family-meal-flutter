@@ -6,7 +6,7 @@ const functions = require('firebase-functions');
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //  response.send("Hello from Firebase!");
 // });
-const functions = require('firebase-functions');
+
 const algoliasearch = require('algoliasearch');
 const ALGOLIA_ID = functions.config().algolia.app_id;
 const ALGOLIA_ADMIN_KEY = functions.config().algolia.api_key;
@@ -15,14 +15,11 @@ const ALGOLIA_INDEX_NAME = 'posts';
 
 const client = algoliasearch(ALGOLIA_ID, ALGOLIA_ADMIN_KEY);
 
-
-
-
-exports.createIndex = functions.database.ref('posts/{postID}').onCreate((snap, context) => {
+exports.createIndex = functions.firestore.document('posts/{postID}').onCreate((snap, context) => {
  const data = snap.data();
     // AlgoliaのIndexに保存する情報
   const algoliaObject = {
-    groupID: data.groupID,
+    groupID: data.GroupID,
     title: data.title,
     text: data.text,
   };
@@ -31,20 +28,22 @@ exports.createIndex = functions.database.ref('posts/{postID}').onCreate((snap, c
   // Indexを保存
   const index = client.initIndex(ALGOLIA_INDEX_NAME);
   return index.saveObject(algoliaObject);
-});
-exports.removeIndex = functions.database.ref('posts/{postID}').onDelete((snap, context)  => {
+})
+exports.removeIndex = functions.firestore.document('posts/{postID}').onDelete((snap, context)  => {
    const objectID = context.params.postId;
-   index.deleteObject(objectID)
-});
-exports.editIndex  = functions.database.ref('posts/{postID}').onUpdate((snap, context) => {
+
+   return index.deleteObject(objectID);
+})
+exports.editIndex  = functions.firestore.document('posts/{postID}').onUpdate((snap, context) => {
  const afterData = snap.after.data();
  const algoliaObject = {
      groupID: afterData.groupID,
      title: afterData.title,
      text: afterData.text,
    };
-   algoliaObject.objectID = context.params.postId;
-});
+  algoliaObject.objectID = context.params.postId;
+  return index.saveObject(algoliaObject);
+})
 
 const admin = require('firebase-admin');
 const { firebaseConfig } = require('firebase-functions');
@@ -71,6 +70,23 @@ exports.addGroup = functions.https.onCall((data, context) =>{
         .catch(function(error) {
            throw console.error("Error adding document: ", error);
         });
+})
+exports.copyPost = functions.https.onCall((data, context) =>{
+  return userRef.doc(context.auth.uid).collection('feed').doc(data.postID).set({
+      postID: data.postID
+  });
+})
+exports.copyPostForGroup = functions.firestore.document('posts/{postID}').onCreate((snap, context) => {
+  const postID = context.params.postID;
+  const groupID = snap.data().GroupID;
+  return groupRef.doc(groupID).collection('posts').doc(postID).set({
+    postID: postID,
+  });
+})
+exports.removePostForGroup = functions.firestore.document('posts/{postID}').onDelete((snap, context) => {
+  const postID = context.params.postID;
+  const groupID = snap.data().GroupID;
+  return groupRef.doc(groupID).collection('posts').doc(postID).delete();
 })
 
 exports.addPost = functions.https.onCall((data, context) =>{

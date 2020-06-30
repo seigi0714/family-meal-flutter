@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +12,7 @@ import 'package:weight/models/Post.dart';
 class PostModel extends ChangeNotifier{
   final db = Firestore.instance;
   final auth = FirebaseAuth.instance;
+  final function = CloudFunctions.instance;
 
   String currentPostName = "";
   String currentPostInfo = "";
@@ -41,7 +42,7 @@ class PostModel extends ChangeNotifier{
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
     final ids = likePost.documents.map((doc) => doc.documentID);
     final bool isLike = ids.contains(id);
-    final posts = Post(name:doc['title'],text:doc['text'],postID:id, groupID:doc['groupID'], created:doc['created'],imageURL:doc['imageURL'],likes:doc['like'],isLike:isLike);
+    final posts = Post(name:doc['title'],text:doc['text'],postID:id, groupID:doc['GroupID'], created:doc['created'],imageURL:doc['imageURL'],likes:doc['like'],isLike:isLike);
     this.isLike = isLike;
     return posts;
   }
@@ -60,6 +61,23 @@ class PostModel extends ChangeNotifier{
     profileURL = await (await task.onComplete).ref.getDownloadURL();
     notifyListeners();
   }
+  Future addPost(String name, String text, String imageURL,String groupID) async {
+    db.collection('posts').add({
+      'name': name,
+      'text': text,
+      'imageURL': imageURL,
+      'GroupID' : groupID,
+      'like': 0,
+      'created': FieldValue.serverTimestamp()
+    }).then((docRef){
+      function
+          .getHttpsCallable(functionName: 'copyPost')
+          .call({
+        'postID': docRef.documentID,
+      });
+    });
+  }
+  
   // algoliaに検索をかける
   Future searchPost(text) async {
     Algolia algolia = Algolia.init(
