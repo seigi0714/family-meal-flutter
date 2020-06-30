@@ -57,9 +57,11 @@ class GroupModel extends ChangeNotifier {
     // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
     Future<Group> _fetchGroup(String groupId) async {
       final doc = await db.collection('groups').document(groupId).get();
+      final postdoc = await db.collection('groups').document(groupId).collection('posts').getDocuments();
+      final postIDs = postdoc.documents.map((doc) => doc.documentID).toList();
       final group = Group(
-          doc.documentID,doc['name'], doc['text'], doc['iconImage'], doc['GroupUser'],
-          doc['UserCount'], doc['Follower']);
+          groupID:doc.documentID,name:doc['name'], text:doc['text'], iconURL:doc['iconImage'], userID:doc['GroupUser'],
+          userCount:doc['UserCount'], follower:doc['Follower'],postIds: postIDs);
         return group;
     }
 
@@ -83,6 +85,16 @@ class GroupModel extends ChangeNotifier {
       final posts = Post(name:doc['title'],text:doc['text'],postID:id, groupID:doc['groupID'],imageURL:doc['imageURL'],created:doc['created'],likes:doc['like']);
       return posts;
     }
+    // idの配列から投稿を取得する
+   Future getPosts(List<String> ids) async {
+      List<Future<Post>> tasks = ids.map((id) async {
+        return _fetchMyPost(id);
+      }).toList();
+      final posts = await Future.wait(tasks);
+      print(posts.toString());
+      this.posts = posts;
+      notifyListeners();
+   }
 
 
 Future imageSet(image) {

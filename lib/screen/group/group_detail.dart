@@ -34,7 +34,7 @@ class GroupDetail extends StatelessWidget {
                                   return PostAdd(group: group);
                                 },
                               ),
-                            );model.fetchPost(group);
+                            );model.getPosts(group.postIds);
                           },
                           child: Icon(
                             Icons.edit,
@@ -89,13 +89,13 @@ class GroupDetail extends StatelessWidget {
                                   Text(
                                     group.userCount.toString(),
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 15,
                                     ),
                                   ),
                                   Text(
                                     'フォロワー',
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 15,
                                     ),
                                   )
                                 ],
@@ -108,13 +108,13 @@ class GroupDetail extends StatelessWidget {
                                   Text(
                                     group.follower.toString(),
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 15,
                                     ),
                                   ),
                                   Text(
                                     'メンバー',
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 15,
                                     ),
                                   ),
                                 ],
@@ -161,17 +161,43 @@ class GroupDetail extends StatelessWidget {
                   SizedBox(
                     height: 5,
                   ),
-                  GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 4 ,
-                    crossAxisSpacing: 4.0, // 縦スペース
-                    mainAxisSpacing: 4.0,
-                      children: imageList,
-                    ),
+                  ImageList(group: group)
                 ]);
               }));
         }
       ),
+    );
+  }
+}
+
+class ImageList extends StatelessWidget {
+  ImageList({this.group});
+  final Group group;
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<GroupModel>(
+      create: (_) => GroupModel()..getPosts(group.postIds),
+        child: Consumer<GroupModel>(
+            builder: (context,model,child){
+              final posts = model.posts;
+              final imageList = posts.map((post) => Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  image: DecorationImage(
+                    image: NetworkImage(post.imageURL),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              )).toList();
+              return GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 4 ,
+                crossAxisSpacing: 4.0, // 縦スペース
+                mainAxisSpacing: 4.0,
+                children: imageList,
+              );
+            }
+        )
     );
   }
 }
