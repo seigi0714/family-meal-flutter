@@ -20,17 +20,17 @@ exports.createIndex = functions.firestore.document('posts/{postID}').onCreate((s
     // AlgoliaのIndexに保存する情報
   const algoliaObject = {
     groupID: data.GroupID,
-    title: data.title,
+    title: data.name,
     text: data.text,
   };
-  algoliaObject.objectID = context.params.postId;
+  algoliaObject.objectID = context.params.postID;
 
   // Indexを保存
   const index = client.initIndex(ALGOLIA_INDEX_NAME);
   return index.saveObject(algoliaObject);
 })
 exports.removeIndex = functions.firestore.document('posts/{postID}').onDelete((snap, context)  => {
-   const objectID = context.params.postId;
+   const objectID = context.params.postID;
 
    return index.deleteObject(objectID);
 })
@@ -41,7 +41,7 @@ exports.editIndex  = functions.firestore.document('posts/{postID}').onUpdate((sn
      title: afterData.title,
      text: afterData.text,
    };
-  algoliaObject.objectID = context.params.postId;
+  algoliaObject.objectID = context.params.postID;
   return index.saveObject(algoliaObject);
 })
 
