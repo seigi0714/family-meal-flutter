@@ -136,12 +136,30 @@ class GroupDetail extends StatelessWidget {
                     group.text,
                     style: TextStyle(fontSize: 15, color: Colors.grey),
                   ),
+                  (group.isBelong)
+                  ?
                   FlatButton(
                       onPressed: null,
                       child: Text(
                         'プロフィール編集',
                         style: TextStyle(color: Colors.indigo),
-                      )),
+                      )
+                  )
+                  : (group.isFollow)
+                  ? FlatButton(
+                      onPressed: null,
+                      child: Text(
+                        'フォローを解除',
+                        style: TextStyle(color: Colors.indigo),
+                      )
+                  )
+                  : FlatButton(
+                      onPressed: null,
+                      child: Text(
+                        'グループをフォロー',
+                        style: TextStyle(color: Colors.indigo),
+                      )
+                  ),
                   SizedBox(
                     height: 20,
                   ),
