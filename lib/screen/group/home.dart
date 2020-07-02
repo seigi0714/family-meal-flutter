@@ -68,8 +68,9 @@ class GroupHome extends StatelessWidget {
                       );
                     },
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text('お気に入りの写真を見つけに行こう'),
+                        Text('ステキなグループを探そう！'),
                         Icon(Icons.search)
                       ],
                     ),
