@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:weight/models/Group.dart';
+import 'package:weight/screen/group/group_detail.dart';
 import 'group_model.dart';
 
 class GroupSearch extends StatelessWidget {
@@ -27,25 +29,71 @@ class GroupSearch extends StatelessWidget {
                   style: TextStyle(color: Colors.white),
                 ),
                 onPressed: () {
-                  model.searching = true;
                   model.searchGroup(_searchText.text);
                 },
               ),
               Expanded(
-                child: model.searching == true
-                    ? Center(
-                  child: Text("Searching, please wait..."),
-                )
-                    : model.posts.length == 0
-                    ? Center(
-                  child: Text("該当する投稿が見つかりませんでした"),
-                )
-                    : Container(),
-              ),
+                  child: model.searching == true
+                      ? model.groups.length == 0
+                          ? Center(
+                              child: Text("該当する投稿が見つかりませんでした"),
+                            )
+                          : GroupList(groups: model.groups)
+                      : Center(
+                          child: Text("Searching, please wait..."),
+                        )),
             ],
           );
         }),
       ),
+    );
+  }
+}
+
+class GroupList extends StatelessWidget {
+  GroupList({this.groups});
+
+  final List<Group> groups;
+
+  @override
+  Widget build(BuildContext context) {
+    final cards = groups
+        .map((group) => Card(
+            child: ListTile(
+                leading: Container(
+                  height: 60.0,
+                  width: 60.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        fit: BoxFit.fill, image: NetworkImage(group.iconURL)),
+                  ),
+                ),
+                title: Text(
+                  group.name,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  group.text,
+                  style: TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return GroupDetail(group: group);
+                      },
+                    ),
+                  );
+                })))
+        .toList();
+    return ListView(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      children: cards,
     );
   }
 }

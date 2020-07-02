@@ -181,10 +181,7 @@ class GroupActions extends StatelessWidget {
         child: Consumer<GroupModel>(builder: (context, model, child) {
           final currentGroup = model.group;
           return (model.loading)
-              ? Center(
-            child: CircularProgressIndicator(),
-          )
-              : (currentGroup.isBelong)
+              ?(currentGroup.isBelong)
               ? FlatButton(
               onPressed: null,
               child: Text(
@@ -209,7 +206,9 @@ class GroupActions extends StatelessWidget {
               child: Text(
                 'グループをフォロー',
                 style: TextStyle(color: Colors.indigo),
-              ));
+              )) : Center(
+            child: CircularProgressIndicator(),
+          );
         }));
   }
 }

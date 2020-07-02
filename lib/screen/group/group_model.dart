@@ -52,7 +52,7 @@ class GroupModel extends ChangeNotifier {
   }
 
   // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
-  Future<Group> _fetchGroup(String groupId, String uid) async {
+  Future _fetchGroup(String groupId, String uid) async {
     final doc = await db.collection('groups').document(groupId).get();
     final followDoc = await db
         .collection('users')
@@ -80,7 +80,7 @@ class GroupModel extends ChangeNotifier {
         isFollow: isFollow);
     return group;
   }
-  Future getGroups(String id) async {
+  Future<Group> getGroups(String id) async {
     final user =await auth.currentUser();
     final doc = await db.collection('groups').document(id).get();
     final followDoc = await db.collection('users').document(user.uid).collection('following').document(id).get();
@@ -96,8 +96,11 @@ class GroupModel extends ChangeNotifier {
       follower: doc['Follower'],
       isBelong: isBelong,
       isFollow: isFollow);
+    print(group.isFollow);
+    this.loading = true;
     this.group = group;
     notifyListeners();
+    return group;
   }
 
   Future fetchPost(Group group) async {
@@ -148,19 +151,20 @@ class GroupModel extends ChangeNotifier {
       applicationId: DotEnv().env["ALGOLIA_APP_KEY"],
       apiKey: DotEnv().env["SEARCH_API_KEY"],
     );
-    AlgoliaQuery query = algolia.instance.index('posts');
+    AlgoliaQuery query = algolia.instance.index('groups');
     query = query.search(text);
+    query = query.setHitsPerPage(30);
 
     final results = (await query.getObjects()).hits;
     print(results.toString());
-    final postIds = results.map((result) => result.objectID);
-    List<Future<Post>> tasks = postIds.map((id) async {
-      return _fetchMyPost(id);
+    final groupIds = results.map((result) => result.objectID);
+    List<Future<Group>> tasks = groupIds.map((id) async {
+      return getGroups(id);
     }).toList();
-    final posts = await Future.wait(tasks);
-    this.posts = posts;
-    print(posts.toString());
-    this.searching = false;
+    final groups = await Future.wait(tasks);
+    this.groups = groups;
+    print(groups.toString());
+    this.searching = true;
     notifyListeners();
   }
 
