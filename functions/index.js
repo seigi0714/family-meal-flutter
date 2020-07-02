@@ -76,6 +76,32 @@ exports.copyPost = functions.https.onCall((data, context) =>{
       postID: data.postID
   });
 })
+exports.copyPostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onCreate((snap, context) => {
+  const postID = context.params.postID;
+  const groupID = context.params.groupID;
+  return groupRef.doc(groupID).collection('Follower').get().then(function(snap) {
+    return snap.forEach(function(doc) {
+      userRef.doc(doc.id).collection('feed').doc(postID).set({
+      postID: postID,
+      });
+    });
+  })
+  .catch(function(error) {
+        console.log("Error getting documents: ", error);
+  });
+})
+exports.removePostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onDelete((snap, context) => {
+  const postID = context.params.postID;
+    const groupID = context.params.groupID;
+    return groupRef.doc(groupID).collection('Follower').get().then(function(snap) {
+      return snap.forEach(function(doc) {
+        userRef.doc(doc.id).collection('feed').doc(postID).delete();
+      });
+    })
+    .catch(function(error) {
+          console.log("Error getting documents: ", error);
+    });
+})
 exports.copyPostForGroup = functions.firestore.document('posts/{postID}').onCreate((snap, context) => {
   const postID = context.params.postID;
   const groupID = snap.data().GroupID;
@@ -126,7 +152,7 @@ exports.followGroupForFollower = functions.firestore.document('users/{userID}/fo
   const userID = context.params.userID;
   return db.collection('groups').doc(groupID).collection('Follower').doc(userID).set({
     userID: userID,
-  })
+  });
 })
 // フォローを外した時の処理
 exports.unFollowGroup = functions.firestore.document('users/{userID}/following/{groupID}').onDelete((snap, context) => {
