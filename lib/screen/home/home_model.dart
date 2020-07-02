@@ -1,4 +1,5 @@
 
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,10 +20,21 @@ class HomeModel extends ChangeNotifier {
 
   Future getGroup(String id) async {
     print(id);
+    final user =await auth.currentUser();
+    final belongDoc = await db.collection('users').document(user.uid).collection('belongingGruop').getDocuments();
+    final belongIds = belongDoc.documents.map((doc) => doc.documentID).toList();
+    final isBelonging = belongIds.contains(id);
+    final followDoc = await db.collection('users').document(user.uid).collection('followGroup').getDocuments();
+    final followIds = followDoc.documents.map((doc) => doc.documentID);
+    final isFollow = followIds.contains(id);
+    
+    final postsDoc = await db.collection('groups').document(id).collection('posts').getDocuments();
+    final postsIds = postsDoc.documents.map((doc) => doc.documentID).toList();
+    
     final doc =await db.collection('groups').document(id).get();
     final group = Group(
         groupID:doc.documentID,name:doc['name'], text:doc['text'], iconURL:doc['iconImage'], userID:doc['GroupUser'],
-        userCount:doc['UserCount'], follower:doc['Follower']);
+        userCount:doc['UserCount'], follower:doc['Follower'],isBelong: isBelonging,postIds: postsIds,isFollow: isFollow);
     this.group = group;
     this.loading = true;
     notifyListeners();
