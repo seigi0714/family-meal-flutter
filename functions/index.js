@@ -105,3 +105,45 @@ exports.addPost = functions.https.onCall((data, context) =>{
       throw console.error("Error adding document: ", error);
     });
 })
+// フォローした時の処理
+exports.followGroup = functions.firestore.document('users/{userID}/following/{groupID}').onCreate((snap, context) => {
+    const groupID = context.params.groupID;
+    const userID = context.params.userID;
+    
+    return groupRef.doc(groupID).collection('posts').get().then(function(snap) {
+        return snap.forEach(function(doc){
+            db.collection('users').doc(userID).collection('feed').doc(doc.id).set({
+            postID: doc.id,
+          });
+        });
+    })
+    .catch(function(error) {
+      console.log("Error getting documents: ", error);
+    });
+})
+exports.followGroupForFollower = functions.firestore.document('users/{userID}/following/{groupID}').onCreate((snap, context) => {
+  const groupID = context.params.groupID;
+  const userID = context.params.userID;
+  return db.collection('groups').doc(groupID).collection('Follower').doc(userID).set({
+    userID: userID,
+  })
+})
+// フォローを外した時の処理
+exports.unFollowGroup = functions.firestore.document('users/{userID}/following/{groupID}').onDelete((snap, context) => {
+  const groupID = context.params.groupID;
+  const userID = context.params.userID;
+  
+  return groupRef.doc(groupID).collection('posts').get().then(function(snap) {
+      return snap.forEach(function(doc){
+          db.collection('users').doc(userID).collection('feed').doc(doc.id).delete();
+      });
+  })
+  .catch(function(error) {
+    console.log("Error getting documents: ", error);
+  });
+})
+exports.unFollowGroupForFollower = functions.firestore.document('users/{userID}/following/{groupID}').onDelete((snap, context) => {
+  const groupID = context.params.groupID;
+  const userID = context.params.userID;
+  return db.collection('groups').doc(groupID).collection('Follower').doc(userID).delete();
+})
