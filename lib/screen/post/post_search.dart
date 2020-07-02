@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:weight/models/Group.dart';
 import 'package:weight/models/Post.dart';
 import 'package:weight/models/user.dart';
 import 'package:weight/screen/User/user_model.dart';
+import 'package:weight/screen/group/group_detail.dart';
 import 'package:weight/screen/home/home.dart';
 import 'package:weight/screen/home/home_model.dart';
 import 'package:weight/screen/post/post_model.dart';
@@ -81,7 +83,7 @@ class PostList extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               new Text(
-                post.name,
+                post.name
               ),
               SizedBox(
                 width: 10.0,
@@ -92,13 +94,21 @@ class PostList extends StatelessWidget {
         )
       ],
     ), ).toList();
-    return ListView(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      children: postList,
+    return ChangeNotifierProvider<PostModel>(
+      create: (_) => PostModel(),
+      child: Consumer<PostModel>(
+        builder: (context,model,child) {
+          return ListView(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            children: postList,
+          );
+        }
+      ),
     );
   }
 }
+
 class PostHeader extends StatelessWidget {
   PostHeader({this.groupID});
   final String groupID;
@@ -108,7 +118,7 @@ class PostHeader extends StatelessWidget {
       create: (_) => HomeModel()..getGroup(groupID),
       child: Consumer<HomeModel>(
           builder: (context,model,child) {
-            final group = model.group;
+            final Group group = model.group;
             return
               (model.loading)
               ?
@@ -117,32 +127,43 @@ class PostHeader extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      // iconImage(group)
-                      Container(
-                        height: 40.0,
-                        width: 40.0,
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(
-                              fit: BoxFit.fill,
-                              image: new NetworkImage(
-                                  group.iconURL
-                              )),
+                  InkWell(
+                    onTap: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return GroupDetail(group:group);
+                          },
                         ),
-                      ),
-                      new SizedBox(
-                        width: 10.0,
-                      ),
-                      // groupname
-                      new Text(
-                        group.name,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      )
-                    ],
+                      );
+                    },
+                    child: Row(
+                      children: <Widget>[
+                        // iconImage(group)
+                        Container(
+                          height: 40.0,
+                          width: 40.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                fit: BoxFit.fill,
+                                image: NetworkImage(
+                                    group.iconURL
+                                )),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        // groupname
+                        Text(
+                          group.name,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
-                  new IconButton(
+                  IconButton(
                     icon: Icon(Icons.more_vert),
                     onPressed: null,
                   )

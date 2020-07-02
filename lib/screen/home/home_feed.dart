@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/Post.dart';
 import 'package:weight/screen/User/user_model.dart';
+import 'package:weight/screen/group/group_detail.dart';
 import 'package:weight/screen/home/home.dart';
 import 'package:weight/screen/home/home_model.dart';
 import 'package:weight/screen/post/post_search.dart';
@@ -58,7 +59,28 @@ class HomePage extends StatelessWidget {
                             ),
                           ),
                         )
-                      : PostList(posts: posts)
+                      : ListView(
+                        children: <Widget>[
+                          Container(
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => PostSearch()),
+                                );
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  Text('お気に入りの写真を見つけに行こう'),
+                                  Icon(Icons.search)
+                                ],
+                              ),
+                            ),
+                          ),
+                          PostList(posts: posts),
+                        ],
+                      )
                   : Center(
                       child: Container(child: CircularProgressIndicator())));
         }));
@@ -83,13 +105,15 @@ class PostList extends StatelessWidget {
                     children: <Widget>[
                       PostHeader(groupID: post.groupID,),
                       // postImage
-                      Flexible(
+                      (post.imageURL != null)
+                      ?Flexible(
                         fit: FlexFit.loose,
                         child: Image.network(
                           post.imageURL,
                           fit: BoxFit.cover,
                         ),
-                      ),
+                      )
+                      : Container(),
                       PostActions(post: post),
                       Padding(
                         padding:
@@ -112,6 +136,8 @@ class PostList extends StatelessWidget {
                 ))
             .toList();
         return ListView(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
           children: postsCard,
         );
       }),
@@ -128,35 +154,51 @@ class PostHeader extends StatelessWidget {
       child: Consumer<HomeModel>(
         builder: (context,model,child) {
           final group = model.group;
-          return Padding(
+          return
+            (model.loading)
+            ? Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    // iconImage(group)
-                    Container(
-                      height: 40.0,
-                      width: 40.0,
-                      decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: new DecorationImage(
-                            fit: BoxFit.fill,
-                            image: new NetworkImage(
-                                group.iconURL
-                            )),
+                InkWell(
+                    onTap: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return GroupDetail(group:group);
+                          },
+                        ),
+                      );
+                    },
+                  child: Row(
+                    children: <Widget>[
+                      // iconImage(group)
+                      (group.iconURL != null)
+                      ?
+                      Container(
+                        height: 40.0,
+                        width: 40.0,
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: new DecorationImage(
+                              fit: BoxFit.fill,
+                              image: new NetworkImage(
+                                  group.iconURL
+                              )),
+                        ),
+                      )
+                      : Container(),
+                      new SizedBox(
+                        width: 10.0,
                       ),
-                    ),
-                    new SizedBox(
-                      width: 10.0,
-                    ),
-                    // groupname
-                    new Text(
-                      group.name,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    )
-                  ],
+                      // groupname
+                      new Text(
+                        group.name,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    ],
+                  ),
                 ),
                 new IconButton(
                   icon: Icon(Icons.more_vert),
@@ -164,7 +206,8 @@ class PostHeader extends StatelessWidget {
                 )
               ],
             ),
-          );
+          )
+                : Container();
         }
       ),
     );
@@ -190,7 +233,7 @@ class PostActions extends StatelessWidget {
                       icon: Icon(Icons.star),
                       onPressed: () async {
                         post.isLike = false;
-// いいねの処理
+                        // いいねの処理
                         await model.unLikePost(post);
                         model.fetchUser();
                       },

@@ -19,7 +19,7 @@ class PostModel extends ChangeNotifier{
   String profileURL = "";
 
   File currentImage;
-  bool searching = false;
+  bool searching = true;
   bool isLike = false;
   List<Post> posts = [];
 
@@ -42,7 +42,7 @@ class PostModel extends ChangeNotifier{
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
     final ids = likePost.documents.map((doc) => doc.documentID);
     final bool isLike = ids.contains(id);
-    final posts = Post(name:doc['title'],text:doc['text'],postID:id, groupID:doc['GroupID'], created:doc['created'],imageURL:doc['imageURL'],likes:doc['like'],isLike:isLike);
+    final posts = Post(name:doc['name'],text:doc['text'],postID:id, groupID:doc['GroupID'], created:doc['created'],imageURL:doc['imageURL'],likes:doc['like'],isLike:isLike);
     this.isLike = isLike;
     return posts;
   }
@@ -88,6 +88,7 @@ class PostModel extends ChangeNotifier{
     query = query.search(text);
 
     final results = (await query.getObjects()).hits;
+    print(results.toString());
     final postIds = results.map((result) => result.objectID);
     List<Future<Post>> tasks = postIds.map((id) async {
       return _fetchMyPost(id);
