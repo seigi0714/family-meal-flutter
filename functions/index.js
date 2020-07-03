@@ -71,7 +71,30 @@ exports.editGroupIndex  = functions.firestore.document('groups/{groupID}').onUpd
   algoliaObject.objectID = context.params.postID;
   return groupIndex.saveObject(algoliaObject);
 })
+exports.createdUserIndex = functions.firestore.document('users/{userID}').onCreate((snap, context) => {
+  const data = snap.data();
+      // AlgoliaのIndexに保存する情報
+    const algoliaObject = {
+      title: data.name,
+    };
+    algoliaObject.objectID = context.params.userID;
+    // Indexを保存
+    const index = client.initIndex('user');
+    return index.saveObject(algoliaObject);
+})
+exports.removeUserIndex = functions.firestore.document('users/{userID}').onDelete((snap, context)  => {
+   const objectID = context.params.userID;
 
+   return groupIndex.deleteObject(objectID);
+})
+exports.editUserIndex  = functions.firestore.document('users/{userID}').onUpdate((snap, context) => {
+ const afterData = snap.after.data();
+ const algoliaObject = {
+     name: afterData.name,
+   };
+  algoliaObject.objectID = context.params.userID;
+  return groupIndex.saveObject(algoliaObject);
+})
 
 const admin = require('firebase-admin');
 const { firebaseConfig } = require('firebase-functions');
