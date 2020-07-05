@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/user.dart';
+import 'package:weight/screen/User/user_invlist.dart';
 import 'package:weight/screen/group/GroupPage.dart';
 import 'package:weight/screen/group/add.dart';
 import 'package:weight/screen/group/home.dart';
@@ -13,10 +14,18 @@ class UserHome extends StatelessWidget {
   Widget build(BuildContext context) {
     var provider = Provider.of<UserModel>(context);
     return ChangeNotifierProvider<UserModel>(
-      create: (_) => UserModel()..setCurrentUser(),
+      create: (_) =>
+      UserModel()
+        ..setCurrentUser(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('aaa'),
+          title: Text(
+            provider.currentUser.name,
+            style: TextStyle(color: Colors.white),
+          ),
+          actions: <Widget>[
+            InvMail(uid: provider.currentUser.userID)
+          ],
         ),
         body: Consumer<UserModel>(
           builder: (context, model, child) {
@@ -57,37 +66,38 @@ class UserHome extends StatelessWidget {
                         height: 350,
                         padding: EdgeInsets.all(15),
                         child: GridView(
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             mainAxisSpacing: 15,
                             childAspectRatio: 1.5,
                           ),
-
                           children: <Widget>[
-                            Card(child: FlatButton(
-                                child: Text('プロフィール編集'),
-                                onPressed: () async {
-                                  await Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return UserEdit();
-                                      },
-                                    ),
-                                  );
-                                  model.setCurrentUser();
-                                })
-                            ),
-                            Card(child: FlatButton(
-                                onPressed: () async {
-                                  await Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return GroupPage();
-                                      },
-                                    ),
-                                  );
-                                },
-                                child: Text('グループ'))),
+                            Card(
+                                child: FlatButton(
+                                    child: Text('プロフィール編集'),
+                                    onPressed: () async {
+                                      await Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return UserEdit();
+                                          },
+                                        ),
+                                      );
+                                      model.setCurrentUser();
+                                    })),
+                            Card(
+                                child: FlatButton(
+                                    onPressed: () async {
+                                      await Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return GroupPage();
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Text('グループ'))),
                             Card(child: FlatButton(child: Text('フォロー'))),
                             Card(child: FlatButton(child: Text('お気に入り'))),
                           ],
@@ -103,6 +113,42 @@ class UserHome extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+class InvMail extends StatelessWidget {
+  InvMail({this.uid});
+  final String uid;
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<UserModel>(
+        builder: (context, model, child) {
+          return
+          model.invCount == 0
+            ? IconButton(
+              icon: Icon(
+                Icons.mail_outline,
+                color: Colors.grey,
+              ),
+              onPressed: null
+          )
+            : IconButton(
+              icon: Icon(
+                Icons.mail,
+                color: Colors.white,
+              ),
+              onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return InvList(uid: uid);
+                      },
+                    ),
+                  );
+              }
+          );
+        }
     );
   }
 }

@@ -4,8 +4,10 @@ class User {
   String userID;
   String name;
   String iconURL;
+  bool isBelong;
+  bool isInv;
 
-  User({this.userID, this.name,this.iconURL});
+  User({this.userID, this.name,this.iconURL,this.isBelong,this.isInv});
 }
 
 class UserData {

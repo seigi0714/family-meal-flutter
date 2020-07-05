@@ -224,3 +224,10 @@ exports.unFollowGroupForFollower = functions.firestore.document('users/{userID}/
   const userID = context.params.userID;
   return db.collection('groups').doc(groupID).collection('Follower').doc(userID).delete();
 })
+exports.incrementGroupUser = functions.firestore.document('users/{userID}/invitation/{groupID}').onCreate((snap,context) => {
+  const groupID = context.params.groupID;
+  const userID = context.params.userID;
+  return db.collection('users').doc(userID).collection('invitation').doc(groupID).update({
+    UserCount: FieldValue.increment(1.0)
+  });
+})
