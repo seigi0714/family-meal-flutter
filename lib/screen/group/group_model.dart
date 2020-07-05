@@ -52,7 +52,7 @@ class GroupModel extends ChangeNotifier {
   }
 
   // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
-  Future _fetchGroup(String groupId, String uid) async {
+  Future<Group> _fetchGroup(String groupId, String uid) async {
     final doc = await db.collection('groups').document(groupId).get();
     final followDoc = await db
         .collection('users')

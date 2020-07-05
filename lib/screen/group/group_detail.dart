@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/Group.dart';
 import 'package:weight/models/Post.dart';
+import 'package:weight/screen/User/user_invitation.dart';
 import 'package:weight/screen/group/group_model.dart';
 import 'package:weight/screen/post/post_add.dart';
 import 'package:weight/screen/post/post_model.dart';
@@ -14,9 +15,7 @@ class GroupDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GroupModel>(
-      create: (_) =>
-      GroupModel()
-        ..fetchPost(group),
+      create: (_) => GroupModel()..fetchPost(group),
       child: Consumer<GroupModel>(builder: (context, model, child) {
         return Scaffold(
             appBar: AppBar(
@@ -45,16 +44,15 @@ class GroupDetail extends StatelessWidget {
             body: Consumer<GroupModel>(builder: (context, model, child) {
               final List<Post> posts = model.posts;
               final imageList = posts
-                  .map((post) =>
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      image: DecorationImage(
-                        image: NetworkImage(post.imageURL),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  ))
+                  .map((post) => Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          image: DecorationImage(
+                            image: NetworkImage(post.imageURL),
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ))
                   .toList();
               return ListView(children: <Widget>[
                 SizedBox(
@@ -175,40 +173,65 @@ class GroupActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GroupModel>(
-        create: (_) =>
-        GroupModel()
-          ..getGroups(group.groupID),
+        create: (_) => GroupModel()..getGroups(group.groupID),
         child: Consumer<GroupModel>(builder: (context, model, child) {
           final currentGroup = model.group;
           return (model.loading)
-              ?(currentGroup.isBelong)
-              ? FlatButton(
-              onPressed: null,
-              child: Text(
-                'プロフィール編集',
-                style: TextStyle(color: Colors.indigo),
-              ))
-              : (currentGroup.isFollow)
-              ? FlatButton(
-              onPressed: () async {
-                currentGroup.isFollow = false;
-                await model.unFollowGroup(currentGroup.groupID);
-              },
-              child: Text(
-                'フォローを解除',
-                style: TextStyle(color: Colors.indigo),
-              ))
-              : FlatButton(
-              onPressed: () async {
-                currentGroup.isFollow = true;
-                await model.followGroup(currentGroup.groupID);
-              },
-              child: Text(
-                'グループをフォロー',
-                style: TextStyle(color: Colors.indigo),
-              )) : Center(
-            child: CircularProgressIndicator(),
-          );
+              ? (currentGroup.isBelong)
+                  ? Column(
+                      children: <Widget>[
+                        Container(
+                          child: FlatButton(
+                              onPressed: () {},
+                              child: Text(
+                                'プロフィール編集',
+                                style: TextStyle(color: Colors.indigo),
+                              )),
+                        ),
+                        RaisedButton(
+                            child: Text(
+                              "メンバーを招待",
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
+                            color: Colors.amber,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            onPressed: () async {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return Invitation(group: group);
+                                  },
+                                ),
+                              );
+                            }),
+                      ],
+                    )
+                  : (currentGroup.isFollow)
+                      ? FlatButton(
+                          onPressed: () async {
+                            currentGroup.isFollow = false;
+                            await model.unFollowGroup(currentGroup.groupID);
+                          },
+                          child: Text(
+                            'フォローを解除',
+                            style: TextStyle(color: Colors.indigo),
+                          ))
+                      : FlatButton(
+                          onPressed: () async {
+                            currentGroup.isFollow = true;
+                            await model.followGroup(currentGroup.groupID);
+                          },
+                          child: Text(
+                            'グループをフォロー',
+                            style: TextStyle(color: Colors.indigo),
+                          ))
+              : Center(
+                  child: CircularProgressIndicator(),
+                );
         }));
   }
 }
@@ -221,22 +244,19 @@ class ImageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GroupModel>(
-        create: (_) =>
-        GroupModel()
-          ..getPosts(group.postIds),
+        create: (_) => GroupModel()..getPosts(group.postIds),
         child: Consumer<GroupModel>(builder: (context, model, child) {
           final posts = model.posts;
           final imageList = posts
-              .map((post) =>
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                  image: DecorationImage(
-                    image: NetworkImage(post.imageURL),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ))
+              .map((post) => Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      image: DecorationImage(
+                        image: NetworkImage(post.imageURL),
+                        fit: BoxFit.fill,
+                      ),
+                    ),
+                  ))
               .toList();
           return GridView.count(
             shrinkWrap: true,
