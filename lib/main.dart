@@ -19,8 +19,16 @@ class MyApp extends StatelessWidget {
       value: AuthService().user,
       child: MaterialApp(
         title: 'Flutter Demo',
+
         theme: ThemeData(
-          primaryColor: Colors.amber
+          primaryColor: Colors.amber,
+          primaryIconTheme: Theme.of(context).primaryIconTheme.copyWith(
+              color: Colors.white,
+          ),
+          textTheme: Theme.of(context).textTheme.apply(
+            displayColor: Colors.white
+
+          ),
         ),
         home: Wrapper(),
       ),

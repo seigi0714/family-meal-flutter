@@ -31,7 +31,7 @@ exports.createIndex = functions.firestore.document('posts/{postID}').onCreate((s
 })
 exports.removeIndex = functions.firestore.document('posts/{postID}').onDelete((snap, context)  => {
    const objectID = context.params.postID;
-
+   const index = client.initIndex(ALGOLIA_INDEX_NAME);
    return index.deleteObject(objectID);
 })
 exports.editIndex  = functions.firestore.document('posts/{postID}').onUpdate((snap, context) => {
@@ -59,7 +59,7 @@ exports.createdGroupIndex = functions.firestore.document('groups/{groupID}').onC
 })
 exports.removeGroupIndex = functions.firestore.document('groups/{groupID}').onDelete((snap, context)  => {
    const objectID = context.params.groupID;
-
+   const groupIndex = client.initIndex('groups');
    return groupIndex.deleteObject(objectID);
 })
 exports.editGroupIndex  = functions.firestore.document('groups/{groupID}').onUpdate((snap, context) => {
@@ -68,7 +68,8 @@ exports.editGroupIndex  = functions.firestore.document('groups/{groupID}').onUpd
      name: afterData.name,
      text: afterData.text,
    };
-  algoliaObject.objectID = context.params.postID;
+   const groupIndex = client.initIndex('groups');
+  algoliaObject.objectID = context.params.groupID;
   return groupIndex.saveObject(algoliaObject);
 })
 exports.createdUserIndex = functions.firestore.document('users/{userID}').onCreate((snap, context) => {
@@ -79,13 +80,13 @@ exports.createdUserIndex = functions.firestore.document('users/{userID}').onCrea
     };
     algoliaObject.objectID = context.params.userID;
     // Indexを保存
-    const index = client.initIndex('user');
-    return index.saveObject(algoliaObject);
+    const userIndex = client.initIndex('user');
+    return userIndex.saveObject(algoliaObject);
 })
 exports.removeUserIndex = functions.firestore.document('users/{userID}').onDelete((snap, context)  => {
    const objectID = context.params.userID;
-
-   return groupIndex.deleteObject(objectID);
+   const userIndex = client.initIndex('user');
+   return userIndex.deleteObject(objectID);
 })
 exports.editUserIndex  = functions.firestore.document('users/{userID}').onUpdate((snap, context) => {
  const afterData = snap.after.data();
@@ -93,7 +94,8 @@ exports.editUserIndex  = functions.firestore.document('users/{userID}').onUpdate
      name: afterData.name,
    };
   algoliaObject.objectID = context.params.userID;
-  return groupIndex.saveObject(algoliaObject);
+  const userIndex = client.initIndex('user');
+  return userIndex.saveObject(algoliaObject);
 })
 
 const admin = require('firebase-admin');
@@ -104,24 +106,18 @@ const db = admin.firestore();
 const userRef = db.collection('users');
 const groupRef = db.collection('groups');
 const postRef = db.collection('posts');
-exports.addGroup = functions.https.onCall((data, context) =>{
-      groupRef.add({
-          name: data.name,
-          text: data.text,
-          iconImage: data.image,
-          GroupUser: context.auth.uid,
-          UserCount: 1,
-          Follower: 0,
-      }).then(function(docRef) {
-        return userRef.doc(context.auth.uid).collection('belongingGroup').doc(docRef.id).set({
-           joinAt: admin.firestore.FieldValue.serverTimestamp(),
-           GroupID: docRef.id
-       })
-      })
-        .catch(function(error) {
-           throw console.error("Error adding document: ", error);
-        });
+exports.addGroup = functions.firestore.document('groups/{groupID}').onCreate((snap,context) => {
+  const data = snap.data();
+  const groupID = context.params.groupID;
+  return userRef.doc(data.Founder).collection('belongingGroup').doc(groupID).set({
+    joinAt: data.created,
+  }).then(function(snap) {
+    return groupRef.doc(groupID).collection('groupUsers').doc(data.Founder).set({
+     joinAt: data.created,
+    });
+  });
 })
+
 exports.copyPost = functions.https.onCall((data, context) =>{
   return userRef.doc(context.auth.uid).collection('feed').doc(data.postID).set({
       postID: data.postID
@@ -224,10 +220,22 @@ exports.unFollowGroupForFollower = functions.firestore.document('users/{userID}/
   const userID = context.params.userID;
   return db.collection('groups').doc(groupID).collection('Follower').doc(userID).delete();
 })
-exports.incrementGroupUser = functions.firestore.document('users/{userID}/invitation/{groupID}').onCreate((snap,context) => {
+exports.competition = functions.firestore.document('users/{userID}/belongingGroup/{groupID}').onDelete((snap,context) => {
+   const userID = context.params.userID;
+   const groupID = context.params.groupID;
+   return groupRef.doc(groupID).collection('groupUsers').doc(userID).delete();
+})
+exports.incrementGroupUser = functions.firestore.document('users/{userID}/belongingGroup/{groupID}').onCreate((snap,context) => {
   const groupID = context.params.groupID;
   const userID = context.params.userID;
-  return db.collection('users').doc(userID).collection('invitation').doc(groupID).update({
-    UserCount: FieldValue.increment(1.0)
+  return db.collection('groups').doc(groupID).update({
+    UserCount: FieldValue.increment(1)
+  });
+})
+exports.decrementGroupUser= functions.firestore.document('users/{userID}/belongingGroup/{groupID}').onDelete((snap,context) => {
+  const groupID = context.params.groupID;
+  const userID = context.params.userID;
+  return db.collection('groups').doc(groupID).update({
+    UserCount: FieldValue.increment(-1)
   });
 })

@@ -99,7 +99,16 @@ class PostModel extends ChangeNotifier{
     this.searching = false;
     notifyListeners();
   }
-
+  Future fetchLikePost(id) async {
+    final doc = await db.collection('users').document(id).collection('likePost').getDocuments();
+    final postIds = doc.documents.map((doc) => doc.documentID).toList();
+    List<Future<Post>> tasks = postIds.map((id) async {
+      return _fetchMyPost(id);
+    }).toList();
+    final likePost = await Future.wait(tasks);
+    this.posts = likePost;
+    notifyListeners();
+  }
   // いいねの処理
   Future likePost(Post post) async {
     final user = await auth.currentUser();

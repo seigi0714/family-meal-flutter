@@ -5,9 +5,7 @@ import 'package:weight/screen/User/user_model.dart';
 
 class InvList extends StatelessWidget {
   InvList({this.uid});
-
   final String uid;
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(

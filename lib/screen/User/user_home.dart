@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/user.dart';
+import 'package:weight/screen/User/user_follows.dart';
 import 'package:weight/screen/User/user_invlist.dart';
 import 'package:weight/screen/group/GroupPage.dart';
 import 'package:weight/screen/group/add.dart';
@@ -8,23 +9,24 @@ import 'package:weight/screen/group/home.dart';
 import 'package:weight/screen/home/BottomNavigation.dart';
 import 'package:weight/screen/User/user_edit.dart';
 import 'package:weight/screen/User/user_model.dart';
+import 'package:weight/screen/post/post_like_list.dart';
 
 class UserHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<UserModel>(context);
     return ChangeNotifierProvider<UserModel>(
-      create: (_) =>
-      UserModel()
-        ..setCurrentUser(),
+      create: (_) => UserModel()..setCurrentUser(),
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            provider.currentUser.name,
+            'マイページ',
             style: TextStyle(color: Colors.white),
           ),
           actions: <Widget>[
-            InvMail(uid: provider.currentUser.userID)
+            provider.currentUser != null
+            ? InvMail(uid: provider.currentUser.userID)
+                : Container()
           ],
         ),
         body: Consumer<UserModel>(
@@ -67,7 +69,7 @@ class UserHome extends StatelessWidget {
                         padding: EdgeInsets.all(15),
                         child: GridView(
                           gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
+                              SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             mainAxisSpacing: 15,
                             childAspectRatio: 1.5,
@@ -98,8 +100,31 @@ class UserHome extends StatelessWidget {
                                       );
                                     },
                                     child: Text('グループ'))),
-                            Card(child: FlatButton(child: Text('フォロー'))),
-                            Card(child: FlatButton(child: Text('お気に入り'))),
+                            Card(
+                                child: FlatButton(
+                                    onPressed: () async {
+                                      await Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return FollowList(uid: user.userID);
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Text('フォロー'))),
+                            Card(child: FlatButton(
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return LikePostList(uid: user.userID);
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: Text('お気に入り')
+                            )
+                            ),
                           ],
                         ),
                       ),
@@ -119,36 +144,33 @@ class UserHome extends StatelessWidget {
 
 class InvMail extends StatelessWidget {
   InvMail({this.uid});
+
   final String uid;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserModel>(
-        builder: (context, model, child) {
-          return
-          model.invCount == 0
-            ? IconButton(
+    return Consumer<UserModel>(builder: (context, model, child) {
+      return model.invCount == 0
+          ? IconButton(
               icon: Icon(
                 Icons.mail_outline,
                 color: Colors.grey,
               ),
-              onPressed: null
-          )
-            : IconButton(
+              onPressed: null)
+          : IconButton(
               icon: Icon(
                 Icons.mail,
                 color: Colors.white,
               ),
               onPressed: () async {
-                  await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return InvList(uid: uid);
-                      },
-                    ),
-                  );
-              }
-          );
-        }
-    );
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return InvList(uid: uid);
+                    },
+                  ),
+                );
+              });
+    });
   }
 }

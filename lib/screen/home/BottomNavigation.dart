@@ -19,22 +19,23 @@ class BottomNavigationBarExample extends StatelessWidget {
     return Scaffold(
       body: currentTab[provider.currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        unselectedItemColor: Colors.grey,
         currentIndex: provider.currentIndex,
         onTap: (index) {
           provider.currentIndex =index;
         },
         items: [
           BottomNavigationBarItem(
-            icon: new Icon(Icons.home),
-            title: new Text('home'),
+            icon: Icon(Icons.home),
+            title:  Text('home'),
           ),
           BottomNavigationBarItem(
-            icon: new Icon(Icons.person),
-            title: new Text('user')
+            icon: Icon(Icons.person),
+            title:  Text('user')
           ),
           BottomNavigationBarItem(
-            icon: new Icon(Icons.group),
-            title: new Text('group')
+            icon:  Icon(Icons.group),
+            title: Text('group')
           )
         ]
       )

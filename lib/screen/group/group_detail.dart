@@ -3,9 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:weight/models/Group.dart';
 import 'package:weight/models/Post.dart';
 import 'package:weight/screen/User/user_invitation.dart';
+import 'package:weight/screen/group/add.dart';
 import 'package:weight/screen/group/group_model.dart';
 import 'package:weight/screen/post/post_add.dart';
 import 'package:weight/screen/post/post_model.dart';
+
+import 'group_follower.dart';
+import 'group_member.dart';
 
 class GroupDetail extends StatelessWidget {
   GroupDetail({this.group});
@@ -15,30 +19,34 @@ class GroupDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GroupModel>(
-      create: (_) => GroupModel()..fetchPost(group),
+      create: (_) => GroupModel()..getGroups(group.groupID),
       child: Consumer<GroupModel>(builder: (context, model, child) {
-        return Scaffold(
+        return model.loading
+          ?
+          Scaffold(
             appBar: AppBar(
               title: Text(
-                group.name,
+                model.group.name,
                 style: TextStyle(color: Colors.white),
               ),
               actions: <Widget>[
-                FlatButton(
-                    onPressed: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return PostAdd(group: group);
-                          },
-                        ),
-                      );
-                      model.getPosts(group.postIds);
-                    },
-                    child: Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                    ))
+                model.group.isBelong
+                    ? FlatButton(
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return PostAdd(group: model.group);
+                              },
+                            ),
+                          );
+                          model.getGroups(model.group.groupID);
+                        },
+                        child: Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                        ))
+                    : Container()
               ],
             ),
             body: Consumer<GroupModel>(builder: (context, model, child) {
@@ -76,19 +84,27 @@ class GroupDetail extends StatelessWidget {
                             shape: BoxShape.circle,
                             image: DecorationImage(
                                 fit: BoxFit.fill,
-                                image: NetworkImage(group.iconURL)),
+                                image: NetworkImage(model.group.iconURL)),
                           ),
                         ),
                         SizedBox(
                           width: 30,
                         ),
                         FlatButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return GroupFollower(group: group);
+                                  },
+                                ),
+                              );
+                            },
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  group.userCount.toString(),
+                                  model.group.follower.toString(),
                                   style: TextStyle(
                                     fontSize: 15,
                                   ),
@@ -102,12 +118,20 @@ class GroupDetail extends StatelessWidget {
                               ],
                             )),
                         FlatButton(
-                            onPressed: () {},
+                            onPressed: () async {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return GroupMember(group: group);
+                                  },
+                                ),
+                              );
+                            },
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 Text(
-                                  group.follower.toString(),
+                                  model.group.userCount.toString(),
                                   style: TextStyle(
                                     fontSize: 15,
                                   ),
@@ -128,16 +152,78 @@ class GroupDetail extends StatelessWidget {
                   height: 10,
                 ),
                 Text(
-                  group.name,
+                  model.group.name,
                   style: TextStyle(
                     fontSize: 30,
                   ),
                 ),
                 Text(
-                  group.text,
+                  model.group.text,
                   style: TextStyle(fontSize: 15, color: Colors.grey),
                 ),
-                GroupActions(group: group),
+                (model.group.isBelong)
+                    ? Column(
+                        children: <Widget>[
+                          Container(
+                            child: FlatButton(
+                                onPressed: () async {
+                                  await Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) {
+                                        return GroupAdd(group: model.group);
+                                      },
+                                    ),
+                                  );
+                                  model.getGroups(model.group.groupID);
+                                },
+                                child: Text(
+                                  'プロフィール編集',
+                                  style: TextStyle(color: Colors.indigo),
+                                )),
+                          ),
+                          RaisedButton(
+                              child: Text(
+                                "メンバーを招待",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              color: Colors.amber,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              onPressed: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return Invitation(group: model.group);
+                                    },
+                                  ),
+                                );
+                              }),
+                        ],
+                      )
+                    : (model.isFollow)
+                        ? FlatButton(
+                            onPressed: () async {
+                              model.isFollow = false;
+                              await model.unFollowGroup(model.group.groupID);
+
+                            },
+                            child: Text(
+                              'フォローを解除',
+                              style: TextStyle(color: Colors.indigo),
+                            )
+                )
+                        : FlatButton(
+                            onPressed: () async {
+                              model.isFollow = true;
+                              await model.followGroup(model.group.groupID);
+                            },
+                            child: Text(
+                              'グループをフォロー',
+                              style: TextStyle(color: Colors.indigo),
+                            )),
                 SizedBox(
                   height: 20,
                 ),
@@ -157,82 +243,91 @@ class GroupDetail extends StatelessWidget {
                 SizedBox(
                   height: 5,
                 ),
-                ImageList(group: group)
+                ImageList(group: model.group)
               ]);
-            }));
+            }))
+            : Container(
+              child: Center(
+          child: CircularProgressIndicator(),
+        ),
+            );
       }),
     );
   }
 }
 
 class GroupActions extends StatelessWidget {
-  GroupActions({this.group});
+  GroupActions({this.group, this.model, this.context});
 
   final Group group;
+  final GroupModel model;
+  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GroupModel>(
-        create: (_) => GroupModel()..getGroups(group.groupID),
-        child: Consumer<GroupModel>(builder: (context, model, child) {
-          final currentGroup = model.group;
-          return (model.loading)
-              ? (currentGroup.isBelong)
-                  ? Column(
-                      children: <Widget>[
-                        Container(
-                          child: FlatButton(
-                              onPressed: () {},
-                              child: Text(
-                                'プロフィール編集',
-                                style: TextStyle(color: Colors.indigo),
-                              )),
+        create: (_) => GroupModel(),
+        child: (model.group.isBelong)
+            ? Column(
+                children: <Widget>[
+                  Container(
+                    child: FlatButton(
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return GroupAdd(group: model.group);
+                              },
+                            ),
+                          );
+                          model.getGroups(model.group.groupID);
+                        },
+                        child: Text(
+                          'プロフィール編集',
+                          style: TextStyle(color: Colors.indigo),
+                        )),
+                  ),
+                  RaisedButton(
+                      child: Text(
+                        "メンバーを招待",
+                        style: TextStyle(
+                          color: Colors.white,
                         ),
-                        RaisedButton(
-                            child: Text(
-                              "メンバーを招待",
-                              style: TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                            color: Colors.amber,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            onPressed: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return Invitation(group: group);
-                                  },
-                                ),
-                              );
-                            }),
-                      ],
-                    )
-                  : (currentGroup.isFollow)
-                      ? FlatButton(
-                          onPressed: () async {
-                            currentGroup.isFollow = false;
-                            await model.unFollowGroup(currentGroup.groupID);
-                          },
-                          child: Text(
-                            'フォローを解除',
-                            style: TextStyle(color: Colors.indigo),
-                          ))
-                      : FlatButton(
-                          onPressed: () async {
-                            currentGroup.isFollow = true;
-                            await model.followGroup(currentGroup.groupID);
-                          },
-                          child: Text(
-                            'グループをフォロー',
-                            style: TextStyle(color: Colors.indigo),
-                          ))
-              : Center(
-                  child: CircularProgressIndicator(),
-                );
-        }));
+                      ),
+                      color: Colors.amber,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return Invitation(group: model.group);
+                            },
+                          ),
+                        );
+                      }),
+                ],
+              )
+            : (model.group.isFollow)
+                ? FlatButton(
+                    onPressed: () async {
+                      model.group.isFollow = false;
+                      await model.unFollowGroup(model.group.groupID);
+                    },
+                    child: Text(
+                      'フォローを解除',
+                      style: TextStyle(color: Colors.indigo),
+                    ))
+                : FlatButton(
+                    onPressed: () async {
+                      model.group.isFollow = true;
+                      await model.followGroup(model.group.groupID);
+                    },
+                    child: Text(
+                      'グループをフォロー',
+                      style: TextStyle(color: Colors.indigo),
+                    )));
   }
 }
 
@@ -244,28 +339,39 @@ class ImageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<GroupModel>(
-        create: (_) => GroupModel()..getPosts(group.postIds),
+        create: (_) => GroupModel()..fetchPost(group),
         child: Consumer<GroupModel>(builder: (context, model, child) {
-          final posts = model.posts;
-          final imageList = posts
-              .map((post) => Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      image: DecorationImage(
-                        image: NetworkImage(post.imageURL),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  ))
-              .toList();
-          return GridView.count(
-            shrinkWrap: true,
-            crossAxisCount: 4,
-            crossAxisSpacing: 4.0,
-            // 縦スペース
-            mainAxisSpacing: 4.0,
-            children: imageList,
-          );
+          return model.posts != null ? ImageView(model) : Container();
         }));
+  }
+}
+
+class ImageView extends StatelessWidget {
+  ImageView(this.model);
+
+  final GroupModel model;
+
+  @override
+  Widget build(BuildContext context) {
+    final posts = model.posts;
+    final imageList = posts
+        .map((post) => Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+                image: DecorationImage(
+                  image: NetworkImage(post.imageURL),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ))
+        .toList();
+    return GridView.count(
+      shrinkWrap: true,
+      crossAxisCount: 4,
+      crossAxisSpacing: 4.0,
+      // 縦スペース
+      mainAxisSpacing: 4.0,
+      children: imageList,
+    );
   }
 }

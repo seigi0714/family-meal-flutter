@@ -106,11 +106,14 @@ class PostList extends StatelessWidget {
                       PostHeader(groupID: post.groupID,),
                       // postImage
                       (post.imageURL != null)
-                      ?Flexible(
-                        fit: FlexFit.loose,
-                        child: Image.network(
-                          post.imageURL,
-                          fit: BoxFit.cover,
+                      ?Container(
+                        height: 500,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.fill,
+                              image: NetworkImage(
+                                  post.imageURL
+                              )),
                         ),
                       )
                       : Container(),
@@ -121,7 +124,7 @@ class PostList extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
-                            new Text(
+                            Text(
                               post.name,
                             ),
                             SizedBox(
@@ -193,17 +196,13 @@ class PostHeader extends StatelessWidget {
                         width: 10.0,
                       ),
                       // groupname
-                      new Text(
+                      Text(
                         group.name,
                         style: TextStyle(fontWeight: FontWeight.bold),
                       )
                     ],
                   ),
                 ),
-                new IconButton(
-                  icon: Icon(Icons.more_vert),
-                  onPressed: null,
-                )
               ],
             ),
           )
@@ -230,7 +229,10 @@ class PostActions extends StatelessWidget {
             children: <Widget>[
               (post.isLike)
                   ? IconButton(
-                      icon: Icon(Icons.star),
+                      icon: Icon(
+                          Icons.star,
+                        color: Colors.amber,
+                      ),
                       onPressed: () async {
                         post.isLike = false;
                         // いいねの処理
@@ -239,7 +241,10 @@ class PostActions extends StatelessWidget {
                       },
                     )
                   : IconButton(
-                      icon: Icon(Icons.star_border),
+                      icon: Icon(
+                          Icons.star_border,
+                        color: Colors.amber,
+                      ),
                       onPressed: () async {
                         post.isLike = true;
 // いいねの処理
@@ -247,13 +252,9 @@ class PostActions extends StatelessWidget {
                         model.fetchUser();
                       },
                     ),
-              Text('300'),
+              Text(post.likes.toString()),
               SizedBox(
                 width: 20.0,
-              ),
-              IconButton(
-                icon: Icon(Icons.share),
-                onPressed: () {},
               ),
             ],
           ),

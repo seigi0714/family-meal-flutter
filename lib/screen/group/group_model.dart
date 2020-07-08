@@ -9,12 +9,14 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:weight/models/Post.dart';
+import 'package:weight/models/user.dart';
 import 'package:weight/services/auth.dart';
 
 class GroupModel extends ChangeNotifier {
   final functions = CloudFunctions.instance;
   final db = Firestore.instance;
   final auth = FirebaseAuth.instance;
+  QuerySnapshot postdoc;
   int currentPageIndex = 0;
   bool isFollow = false;
   bool isBelonging = false;
@@ -22,6 +24,7 @@ class GroupModel extends ChangeNotifier {
   bool loading = false;
   String currentGroupName = '';
   Group group;
+  List<User> users;
   String currentGroupInfo = '';
   String profileURL = "https://twitter.com/KboyFlutterUniv/photo";
   File currentImage = null;
@@ -44,16 +47,40 @@ class GroupModel extends ChangeNotifier {
     List<Future<Group>> tasks = documentIds.map((id) async {
       return _fetchGroup(id, uid);
     }).toList();
-
+    print(documentIds.toString());
     final groups = await Future.wait(tasks);
+    print(groups.toString());
     this.groups = groups;
     this.loading = true;
+    notifyListeners();
+  }
+  Future updateGroup(Group group) async {
+    this.loading = true;
+    notifyListeners();
+    if(currentImage != null){
+    await uploadImage(currentImage);
+    }else{
+      profileURL = group.iconURL;
+    }
+    final document =
+    Firestore.instance.collection('groups').document(group.groupID);
+    await document.updateData(
+      {
+        'iconImage': profileURL,
+        'name': currentGroupName,
+        'text': currentGroupInfo,
+        'updateAt': Timestamp.now(),
+      },
+    );
+
+    this.loading = false;
     notifyListeners();
   }
 
   // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
   Future<Group> _fetchGroup(String groupId, String uid) async {
     final doc = await db.collection('groups').document(groupId).get();
+    print(doc.toString());
     final followDoc = await db
         .collection('users')
         .document(uid)
@@ -61,23 +88,30 @@ class GroupModel extends ChangeNotifier {
         .getDocuments();
     final followIds = followDoc.documents.map((doc) => doc.documentID).toList();
     final bool isFollow = followIds.contains(groupId);
-    final postdoc = await db
+    try {
+      this.postdoc = await db
         .collection('groups')
         .document(groupId)
         .collection('posts')
         .getDocuments();
+    } catch (e) {
+      this.postdoc = null;
+    }
+    print(postdoc);
     final postIDs = postdoc.documents.map((doc) => doc.documentID).toList();
+    print(postIDs);
     final group = Group(
         groupID: doc.documentID,
         name: doc['name'],
         text: doc['text'],
         iconURL: doc['iconImage'],
-        userID: doc['GroupUser'],
+        userID: doc['Founder'],
         userCount: doc['UserCount'],
         follower: doc['Follower'],
-        postIds: postIDs,
         isBelong: true,
         isFollow: isFollow);
+    print(group.name);
+    notifyListeners();
     return group;
   }
   Future<Group> getGroups(String id) async {
@@ -85,13 +119,14 @@ class GroupModel extends ChangeNotifier {
     final doc = await db.collection('groups').document(id).get();
     final followDoc = await db.collection('users').document(user.uid).collection('following').document(id).get();
     final isFollow = followDoc.exists;
+    this.isFollow = isFollow;
     final belongDoc = await db.collection('users').document(user.uid).collection('belongingGroup').document(id).get();
     final isBelong = belongDoc.exists;
     final group = Group(groupID: doc.documentID,
       name: doc['name'],
       text: doc['text'],
       iconURL: doc['iconImage'],
-      userID: doc['GroupUser'],
+      userID: doc['Founder'],
       userCount: doc['UserCount'],
       follower: doc['Follower'],
       isBelong: isBelong,
@@ -115,10 +150,8 @@ class GroupModel extends ChangeNotifier {
     List<Future<Post>> tasks = docIds.map((id) async {
       return _fetchMyPost(id);
     }).toList();
-
     final List<Post> posts = await Future.wait(tasks);
     this.posts = posts;
-
     notifyListeners();
   }
 
@@ -133,6 +166,36 @@ class GroupModel extends ChangeNotifier {
         created: doc['created'],
         likes: doc['like']);
     return posts;
+  }
+  Future getFollower(Group group) async {
+    final doc = await db.collection('groups').document(group.groupID).collection('Follower').getDocuments();
+    final documentIDs = doc.documents.map((doc) => doc.documentID);
+    List<Future<User>> tasks = documentIDs.map((id) async {
+      return _fetchFollower(id,group.groupID);
+    }).toList();
+    final users = await Future.wait(tasks);
+    this.users = users;
+    notifyListeners();
+  }
+  Future getMember(Group group) async {
+    final doc = await db.collection('groups').document(group.groupID).collection('groupUsers').getDocuments();
+    final documentIDs = doc.documents.map((doc) => doc.documentID);
+    List<Future<User>> tasks = documentIDs.map((id) async {
+      return _fetchFollower(id,group.groupID);
+    }).toList();
+    final users = await Future.wait(tasks);
+    this.users = users;
+    notifyListeners();
+  }
+  Future<User> _fetchFollower(String uid,String groupID) async {
+    final doc = await db.collection('users').document(uid).get();
+    final invDoc = await db.collection('users').document(uid).collection('invitation').document(groupID).get();
+    final bool isInv = invDoc.exists;
+    final belongDoc = await db.collection('users').document(uid).collection('belongingGroup').document(groupID).get();
+    final isBelong = belongDoc.exists;
+    final currentUser = User(userID: doc.documentID,name: doc['name'],iconURL: doc['iconURL'],isBelong: isBelong,isInv: isInv);
+    final user = User(userID: uid,name: doc['name'],iconURL: doc['iconURL'],isBelong: isBelong,isInv: isInv);
+    return user;
   }
 
   // idの配列から投稿を取得する
@@ -182,6 +245,7 @@ class GroupModel extends ChangeNotifier {
       'Follower': FieldValue.increment(1),
     });
     this.isFollow = true;
+    notifyListeners();
   }
   Future unFollowGroup(String id) async {
     final user = await auth.currentUser();
@@ -192,8 +256,6 @@ class GroupModel extends ChangeNotifier {
     this.isFollow = false;
     notifyListeners();
   }
-
-
   Future uploadImage(image) async {
     FirebaseStorage storage =
         FirebaseStorage(storageBucket: "gs://family-meal-69f4f.appspot.com");
@@ -204,13 +266,37 @@ class GroupModel extends ChangeNotifier {
     profileURL = await (await task.onComplete).ref.getDownloadURL();
     notifyListeners();
   }
-
-  void addGroup(name, text, image) {
-    functions
-        .getHttpsCallable(functionName: 'addGroup')
-        .call({name: name, text: text, image: image});
+  Future invUser(String userID, String groupID) async {
+    db.collection('users').document(userID).collection('invitation').document(groupID).setData({
+      'isJoin': false,
+      'invitationAt': FieldValue.serverTimestamp(),
+    });
   }
 
+  Future addGroup() async {
+    this.loading = true;
+    if (currentGroupName.isEmpty){
+      throw('グループ名を入力してください');
+    }
+    final user = await auth.currentUser();
+    await uploadImage(currentImage);
+    await db.collection('groups').add({
+     'name': currentGroupName,
+     'text': currentGroupInfo,
+     'iconImage': profileURL,
+      'UserCount': 1,
+      'Follower': 0,
+      'Founder': user.uid,
+      'created': FieldValue.serverTimestamp()
+   });
+    this.loading = false;
+    notifyListeners();
+  }
+  Future competition(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('belongingUser').document(group.groupID).delete();
+
+  }
   void linkAddPage() {
     currentPageIndex = 1;
     notifyListeners();

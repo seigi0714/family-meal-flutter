@@ -30,6 +30,7 @@ class UserModel extends ChangeNotifier {
   List<Invitation> invs;
   Group group;
   List<User> users;
+  List<Group> followList;
   File currentImage;
 
   setCurrentUser() async {
@@ -38,9 +39,9 @@ class UserModel extends ChangeNotifier {
     final currentUser = await setUser(uid);
     this.currentUser = currentUser;
     this.currentUserName = currentUser.name;
+    this.loading = true;
     notifyListeners();
   }
-
   Future setUser(uid) async {
     final doc = await db.collection('users').document(uid).get();
     final invDoc = await db.collection('users').document(uid).collection('invitation').getDocuments();
@@ -76,20 +77,19 @@ class UserModel extends ChangeNotifier {
     final StorageReference ref = storage.ref().child("group-icon/${image.toString()}");
     final metaData = StorageMetadata(contentType: "image/png");
     StorageUploadTask task = ref.putFile(image, metaData);
-    currentImageURL = await (await task.onComplete).ref.getDownloadURL();
+    this.currentImageURL = await (await task.onComplete).ref.getDownloadURL();
     notifyListeners();
     return currentImageURL;
   }
-
   Future nameEdit(name) async {
      this.currentUserName = name;
   }
-  Future updateUser(String imageURL,String name) async {
+  Future updateUser() async {
     final user = await auth.currentUser();
     final String uid = user.uid;
     await db.collection('users').document(uid).updateData({
-        "iconURL": imageURL,
-         "name": name,
+        "iconURL": currentImageURL,
+         "name": currentUserName,
       },
     );
   }
@@ -175,6 +175,23 @@ class UserModel extends ChangeNotifier {
   Future chancel(String id) async {
     final user = await auth.currentUser();
     await db.collection('users').document(user.uid).collection('invitation').document(id).delete();
+  }
+  Future getFollowGroups(String uid) async {
+    final doc = await db.collection('users').document(uid).collection('following').getDocuments();
+    print(doc.toString());
+    final docIds = doc.documents.map((doc) => doc.documentID).toList();
+    List<Future<Group>> tasks = docIds.map((id) async {
+      return _getFollowGroups(id);
+    }).toList();
+    final groups = await Future.wait(tasks);
+    print(groups.toString());
+    this.followList = groups;
+    notifyListeners();
+  }
+  Future<Group> _getFollowGroups(String id) async {
+    final doc = await db.collection('groups').document(id).get();
+    final group = Group(groupID: id,name: doc['name'],text: doc['text'],iconURL: doc['iconImage'],isBelong: true,follower: doc['Follower'],userCount: doc['UserCount']);
+    return group;
   }
 }
 
