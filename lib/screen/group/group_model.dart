@@ -275,6 +275,7 @@ class GroupModel extends ChangeNotifier {
 
   Future addGroup() async {
     this.loading = true;
+    notifyListeners();
     if (currentGroupName.isEmpty){
       throw('グループ名を入力してください');
     }
@@ -294,7 +295,7 @@ class GroupModel extends ChangeNotifier {
   }
   Future competition(Group group) async {
     final user = await auth.currentUser();
-    await db.collection('users').document(user.uid).collection('belongingUser').document(group.groupID).delete();
+    await db.collection('users').document(user.uid).collection('belongingGroup').document(group.groupID).delete();
 
   }
   void linkAddPage() {

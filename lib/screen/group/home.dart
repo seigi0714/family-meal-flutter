@@ -51,6 +51,7 @@ class GroupHome extends StatelessWidget {
                         trailing: FlatButton(
                             onPressed: () async {
                               await competitionGroup(model, context, group);
+                              model.fetchMyGroups();
                             },
                             child: Text(
                               '脱退',
@@ -67,6 +68,7 @@ class GroupHome extends StatelessWidget {
                               },
                             ),
                           );
+                          model.fetchMyGroups();
                         }
                     )))
                 .toList();
@@ -133,6 +135,7 @@ Future competitionGroup(model, context, group) async {
             child: Text('脱退'),
             onPressed: () async {
               await model.competition(group);
+              Navigator.pop(context);
             },
           ),
           FlatButton(

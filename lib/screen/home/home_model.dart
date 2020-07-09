@@ -71,8 +71,9 @@ class HomeModel extends ChangeNotifier {
   }//
   Future fetchFeedPost() async {
     final user = await auth.currentUser();
-    final doc = await db.collection('users').document(user.uid).collection('feed').getDocuments();
-    final postIds = doc.documents.map((doc) => doc.documentID).toList();
+    final doc = await db.collection('users').document(user.uid).collection('feed').orderBy("created", descending: true).getDocuments();
+    final postIds = doc.documents
+    .map((doc) => doc.documentID).toList();
     print(postIds);
     List<Future<Post>> tasks = postIds.map((id) async {
       return _fetchMyPost(id);

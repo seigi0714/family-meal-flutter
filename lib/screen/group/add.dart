@@ -43,7 +43,11 @@ class GroupAdd extends StatelessWidget {
               model.currentGroupInfo = group.text;
               model.profileURL = group.iconURL;
             }
-            return SingleChildScrollView(
+            return model.loading
+              ? Center(
+              child: CircularProgressIndicator(),
+            )
+             : SingleChildScrollView(
               reverse: true,
               child: Column(
                 children: <Widget>[

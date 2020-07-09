@@ -120,16 +120,20 @@ exports.addGroup = functions.firestore.document('groups/{groupID}').onCreate((sn
 
 exports.copyPost = functions.https.onCall((data, context) =>{
   return userRef.doc(context.auth.uid).collection('feed').doc(data.postID).set({
-      postID: data.postID
+      postID: data.postID,
+      created: FieldValue.serverTimestamp();
+    
   });
 })
 exports.copyPostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onCreate((snap, context) => {
   const postID = context.params.postID;
   const groupID = context.params.groupID;
+  const data = snap.data();
   return groupRef.doc(groupID).collection('Follower').get().then(function(snap) {
     return snap.forEach(function(doc) {
       userRef.doc(doc.id).collection('feed').doc(postID).set({
       postID: postID,
+      created: data.created
       });
     });
   })
@@ -152,8 +156,10 @@ exports.removePostForFollower = functions.firestore.document('groups/{groupID}/p
 exports.copyPostForGroup = functions.firestore.document('posts/{postID}').onCreate((snap, context) => {
   const postID = context.params.postID;
   const groupID = snap.data().GroupID;
+  const data = snap.data();
   return groupRef.doc(groupID).collection('posts').doc(postID).set({
     postID: postID,
+    created: data.created
   });
 })
 exports.removePostForGroup = functions.firestore.document('posts/{postID}').onDelete((snap, context) => {
@@ -187,6 +193,7 @@ exports.followGroup = functions.firestore.document('users/{userID}/following/{gr
         return snap.forEach(function(doc){
             db.collection('users').doc(userID).collection('feed').doc(doc.id).set({
             postID: doc.id,
+            created: doc.created
           });
         });
     })
