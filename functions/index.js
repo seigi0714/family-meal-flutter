@@ -121,8 +121,7 @@ exports.addGroup = functions.firestore.document('groups/{groupID}').onCreate((sn
 exports.copyPost = functions.https.onCall((data, context) =>{
   return userRef.doc(context.auth.uid).collection('feed').doc(data.postID).set({
       postID: data.postID,
-      created: FieldValue.serverTimestamp();
-    
+      created: FieldValue.serverTimestamp()
   });
 })
 exports.copyPostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onCreate((snap, context) => {
