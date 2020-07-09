@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "797128335126",
+    "firebase_url": "https://family-meal-69f4f.firebaseio.com",
+    "project_id": "family-meal-69f4f",
+    "storage_bucket": "family-meal-69f4f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797128335126:android:33f89eec8897f1ea34fa37",
+        "android_client_info": {
+          "package_name": "net.sei.weight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "797128335126-bl2ohivpqbtglkcoucncc5u7ejbj8anf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzEwhcMRvfnISZB8Qbl3OV7OIrxIKEigk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "797128335126-bl2ohivpqbtglkcoucncc5u7ejbj8anf.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "797128335126-d620o92tno97fq343cthebf4i90fl45n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "net.sei.weight"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
