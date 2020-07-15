@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:weight/models/Comment.dart';
 import 'package:weight/models/Group.dart';
 import 'package:weight/models/Post.dart';
 import 'package:algolia/algolia.dart';
@@ -14,6 +15,7 @@ class HomeModel extends ChangeNotifier {
   Group group;
   List<Group> belongGroup = [];
   List<Post> userPost = [];
+  List<Comment> postComments = [];
   bool isLike = false;
   bool loading = false;
   bool search = false;
@@ -106,6 +108,26 @@ class HomeModel extends ChangeNotifier {
     print(post.name);
     return post;
   }
+  Future fetchPostComments(Post post) async {
+    final user = await auth.currentUser();
+    final doc = await db.collection('posts').document(post.postID).collection('comments').getDocuments();
+    final groupUsers = await db.collection('groups').document(post.groupID).collection('groupUsers').getDocuments();
+    final List<String> userIds = groupUsers.documents.map((doc) => doc.documentID).toList();
+    final List<String> commentIds = doc.documents.map((doc) => doc.documentID).toList();
+    List<Future<Comment>> tasks = commentIds.map((id) async {
+      return _fetchPostComments(id,userIds);
+    });
+    final List<Comment> results = await Future.wait(tasks);
+    this.postComments = results;
+    notifyListeners();
+  }
+  Future<Comment> _fetchPostComments(String id,List<String> ids) async {
+    final doc = await db.collection('comments').document(id).get();
+    final bool isGroupUser = ids.contains(doc['userID']);
+    final comment = Comment(postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: doc['created'],isGroupUser: isGroupUser);
+    return comment;
+  }
+  
 
 
 

@@ -263,3 +263,21 @@ class PostActions extends StatelessWidget {
     );
   }
 }
+
+class PostComment extends StatelessWidget {
+  PostComment({this.post});
+  final Post post;
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<HomeModel>(
+        create:(_) => HomeModel()..fetchPostComments(post),
+      child: Consumer(
+          builder: (context,model,child){
+
+            return ListView();
+          }
+      ),
+    );
+  }
+}
+
