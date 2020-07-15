@@ -30,7 +30,11 @@ class MyApp extends StatelessWidget {
 
           ),
         ),
-        home: Wrapper(),
+        home:
+            GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+             child: Wrapper(),
+            ),
       ),
     );
   }

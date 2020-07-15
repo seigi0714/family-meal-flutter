@@ -9,6 +9,8 @@
 .history
 .svn/
 .env
+*.jks
+keystore.properties
 
 
 # IntelliJ related

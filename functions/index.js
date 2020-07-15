@@ -140,6 +140,22 @@ exports.copyPostForFollower = functions.firestore.document('groups/{groupID}/pos
         console.log("Error getting documents: ", error);
   });
 })
+exports.copyPostForMember = functions.firestore.document('groups/{groupID}/posts/{postID}').onCreate((snap, context) => {
+  const postID = context.params.postID;
+  const groupID = context.params.groupID;
+  const data = snap.data();
+  return groupRef.doc(groupID).collection('groupUsers').get().then(function(snap) {
+    return snap.forEach(function(doc) {
+      userRef.doc(doc.id).collection('feed').doc(postID).set({
+      postID: postID,
+      created: data.created
+      });
+    });
+  })
+  .catch(function(error) {
+        console.log("Error getting documents: ", error);
+  });
+})
 exports.removePostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onDelete((snap, context) => {
   const postID = context.params.postID;
     const groupID = context.params.groupID;

@@ -18,82 +18,83 @@ class SignIn extends StatelessWidget {
   }
 }
 class SignInFormPage extends StatelessWidget {
-  final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailTextEditController = TextEditingController();
+  final TextEditingController passTextEditController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<SignInForm>(context);
     return Scaffold(
       appBar: AppBar(title: Text('SignIn')),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: 20.0),
-                TextFormField(
-                  decoration: textInputDecoration.copyWith(hintText: 'email'),
-                  validator: (val) => val.isEmpty ? 'Enter an Email' : null,
-                  onChanged: (val) {
-                    provider.currentEmail = val;
-                  },
-                ),
-                SizedBox(height: 50.0),
-                TextFormField(
-                  obscureText: true,
-                  decoration:
-                  textInputDecoration.copyWith(hintText: 'password'),
-                  validator: (val) =>
-                  val.length < 6 ? '6~12文字入力してください' : null,
-                  onChanged: (val) {
-                    provider.currentPassword = val ;
-                  },
-                ),
-                SizedBox(
-                  height: 50.0,
-                ),
-                RaisedButton(
-                  color: Colors.amber,
-                  child: Text(
-                    'ログイン',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: SingleChildScrollView(
+          reverse: true,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: <Widget>[
+                  SizedBox(height: 20.0),
+                  TextField(
+                    decoration: textInputDecoration.copyWith(hintText: 'email'),
+                    controller: emailTextEditController,
+                    onChanged: (text) {
+                      provider.currentEmail = text;
+                    },
                   ),
-                  elevation: 1.0,
-                  shape: StadiumBorder(),
-                  onPressed: ()  {
-                    if (_formKey.currentState.validate()) {
-                      String email = provider.currentEmail;
-                      String password = provider.currentPassword;
-                      context.read<SignInForm>().SignInAction(email, password);
-                    }
-                  },
-                ),
-                SizedBox(
-                  height: 30.0,
-                ),
-                errorText(),
-                SizedBox(height: 20.0),
-                FlatButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Register()),
-                    );
-                  },
-                  child: Text('新規登録はこちら',
+                  SizedBox(height: 50.0),
+                  TextField(
+                    obscureText: true,
+                    decoration:
+                    textInputDecoration.copyWith(hintText: 'password'),
+                    controller: passTextEditController,
+                    onChanged: (text) {
+                      provider.currentPassword = text;
+                    },
+                  ),
+                  SizedBox(
+                    height: 50.0,
+                  ),
+                  RaisedButton(
+                    color: Colors.amber,
+                    child: Text(
+                      'ログイン',
                       style: TextStyle(
-                        color: Colors.indigo,
-                      )),
-                ),
-              ],
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    elevation: 1.0,
+                    shape: StadiumBorder(),
+                    onPressed: ()  {
+                        String email = provider.currentEmail;
+                        String password = provider.currentPassword;
+                        context.read<SignInForm>().SignInAction(email, password);
+                    },
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  errorText(),
+                  SizedBox(height: 20.0),
+                  FlatButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Register()),
+                      );
+                    },
+                    child: Text('新規登録はこちら',
+                        style: TextStyle(
+                          color: Colors.indigo,
+                        )),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

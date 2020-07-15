@@ -37,115 +37,118 @@ class GroupAdd extends StatelessWidget {
               ),
             ),
           ),
-          body: Consumer<GroupModel>(builder: (context, model, child) {
-            if (isUpdate) {
-              model.currentGroupName = group.name;
-              model.currentGroupInfo = group.text;
-              model.profileURL = group.iconURL;
-            }
-            return model.loading
-              ? Center(
-              child: CircularProgressIndicator(),
-            )
-             : SingleChildScrollView(
-              reverse: true,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(height: 20.0),
-                  (model.currentImage == null)
-                      ? isUpdate
-                          ? Column(
-                              children: <Widget>[
-                                InkWell(
-                                  onTap: () async {
-                                    var image = await ImagePicker.pickImage(
-                                        source: ImageSource.gallery);
-                                    context.read<GroupModel>().imageSet(image);
-                                  },
-                                  child: Container(
-                                    height: 150,
-                                    width: 150,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          fit: BoxFit.fill,
-                                          image: NetworkImage(group.iconURL)),
+          body: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Consumer<GroupModel>(builder: (context, model, child) {
+              if (isUpdate) {
+                model.currentGroupName = group.name;
+                model.currentGroupInfo = group.text;
+                model.profileURL = group.iconURL;
+              }
+              return model.loading
+                ? Center(
+                child: CircularProgressIndicator(),
+              )
+               : SingleChildScrollView(
+                reverse: true,
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(height: 20.0),
+                    (model.currentImage == null)
+                        ? isUpdate
+                            ? Column(
+                                children: <Widget>[
+                                  InkWell(
+                                    onTap: () async {
+                                      var image = await ImagePicker.pickImage(
+                                          source: ImageSource.gallery);
+                                      context.read<GroupModel>().imageSet(image);
+                                    },
+                                    child: Container(
+                                      height: 150,
+                                      width: 150,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            fit: BoxFit.fill,
+                                            image: NetworkImage(group.iconURL)),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                FlatButton(
-                                    onPressed: () async {
-                                      var image = await ImagePicker.pickImage(
-                                          source: ImageSource.gallery);
-                                      context
-                                          .read<GroupModel>()
-                                          .imageSet(image);
-                                    },
-                                    child: Text('プロフィール画像を変更'))
-                              ],
-                            )
-                          : Container(
-                              height: 200,
-                              child: Center(
-                                child: FlatButton(
-                                    onPressed: () async {
-                                      var image = await ImagePicker.pickImage(
-                                          source: ImageSource.gallery);
-                                      context
-                                          .read<GroupModel>()
-                                          .imageSet(image);
-                                    },
-                                    child: Text('プロフィール画像を変更')),
-                              ))
-                      : Image.file(
-                          model.currentImage,
-                          height: 200,
-                        ),
-                  SizedBox(height: 20.0),
-                  TextField(
-                    decoration: textInputDecoration.copyWith(hintText: 'グループ名'),
-                    controller: nameEditingController,
-                    onChanged: (text) {
-                      model.currentGroupName = text;
-                    },
-                  ),
-                  SizedBox(height: 50.0),
-                  TextField(
-                    decoration:
-                        textInputDecoration.copyWith(hintText: '一言でグループ紹介'),
-                    controller: textEditingController,
-                    onChanged: (text) {
-                      model.currentGroupInfo = text;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  SizedBox(
-                      width: 160,
-                      child: RaisedButton(
-                          color: Colors.amber,
-                          child: Text(
-                            isUpdate ? '編集' : 'グループ作成',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                  FlatButton(
+                                      onPressed: () async {
+                                        var image = await ImagePicker.pickImage(
+                                            source: ImageSource.gallery);
+                                        context
+                                            .read<GroupModel>()
+                                            .imageSet(image);
+                                      },
+                                      child: Text('プロフィール画像を変更'))
+                                ],
+                              )
+                            : Container(
+                                height: 200,
+                                child: Center(
+                                  child: FlatButton(
+                                      onPressed: () async {
+                                        var image = await ImagePicker.pickImage(
+                                            source: ImageSource.gallery);
+                                        context
+                                            .read<GroupModel>()
+                                            .imageSet(image);
+                                      },
+                                      child: Text('プロフィール画像を変更')),
+                                ))
+                        : Image.file(
+                            model.currentImage,
+                            height: 200,
                           ),
-                          elevation: 1.0,
-                          shape: StadiumBorder(),
-                          onPressed: () async {
-                            if (isUpdate) {
-                              await updateGroup(model, context, group);
-                            } else {
-                              // firestoreに本を追加
-                              await addGroup(model, context);
-                            }
-                          })),
-                ],
-              ),
-            );
-          })),
+                    SizedBox(height: 20.0),
+                    TextField(
+                      decoration: textInputDecoration.copyWith(hintText: 'グループ名'),
+                      controller: nameEditingController,
+                      onChanged: (text) {
+                        model.currentGroupName = text;
+                      },
+                    ),
+                    SizedBox(height: 50.0),
+                    TextField(
+                      decoration:
+                          textInputDecoration.copyWith(hintText: '一言でグループ紹介'),
+                      controller: textEditingController,
+                      onChanged: (text) {
+                        model.currentGroupInfo = text;
+                      },
+                    ),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    SizedBox(
+                        width: 160,
+                        child: RaisedButton(
+                            color: Colors.amber,
+                            child: Text(
+                              isUpdate ? '編集' : 'グループ作成',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            elevation: 1.0,
+                            shape: StadiumBorder(),
+                            onPressed: () async {
+                              if (isUpdate) {
+                                await updateGroup(model, context, group);
+                              } else {
+                                // firestoreに本を追加
+                                await addGroup(model, context);
+                              }
+                            })),
+                  ],
+                ),
+              );
+            }),
+          )),
     );
   }
 }
