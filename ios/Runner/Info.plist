@@ -35,11 +35,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>アップロードした画像をアプリ内で表示するため</string>
+	<string>アップロードした画像をアプリ内で共有するため</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>アップロードした画像をアプリ内で表示するため</string>
+	<string>アップロードした画像をアプリ内で共有するため</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>アップロードした画像をアプリ内で表示するため</string>
+	<string>アップロードした画像をアプリ内で共有するため</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
