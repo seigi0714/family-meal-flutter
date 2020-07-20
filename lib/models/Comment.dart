@@ -1,5 +1,6 @@
 class Comment {
-  Comment({this.postID,this.userID,this.text,this.created,this.isGroupUser});
+  Comment({this.commentID,this.postID,this.userID,this.text,this.created,this.isGroupUser});
+  final String commentID;
   final String postID;
   final String userID;
   final String text;

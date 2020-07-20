@@ -19,6 +19,7 @@ class PostModel extends ChangeNotifier{
   String currentPostName = "";
   String currentPostInfo = "";
   String profileURL = "";
+  String commentText = "";
   List<Comment> postComments = [];
   File currentImage;
   bool loading = true;
@@ -46,17 +47,17 @@ class PostModel extends ChangeNotifier{
     final List<String> userIds = groupUsers.documents.map((doc) => doc.documentID).toList();
     final List<String> commentIds = doc.documents.map((doc) => doc.documentID).toList();
     List<Future<Comment>> tasks = commentIds.map((id) async {
-      return _fetchPostComments(id,userIds);
+      return _fetchPostComments(id,userIds,post.postID);
     });
     final List<Comment> results = await Future.wait(tasks);
     this.postComments = results;
     this.loading = true;
     notifyListeners();
   }
-  Future<Comment> _fetchPostComments(String id,List<String> ids) async {
-    final doc = await db.collection('comments').document(id).get();
+  Future<Comment> _fetchPostComments(String id,List<String> ids,String postID) async {
+    final doc = await db.collection('posts').document(postID).collection('comments').document(id).get();
     final bool isGroupUser = ids.contains(doc['userID']);
-    final comment = Comment(postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: doc['created'],isGroupUser: isGroupUser);
+    final comment = Comment(commentID: doc['commentID'],postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: doc['created'],isGroupUser: isGroupUser);
     return comment;
   }
   Future<Post> _fetchMyPost(String id) async {
@@ -162,5 +163,18 @@ class PostModel extends ChangeNotifier{
     db.collection('users').document(user.uid).collection('likePost').document(post.postID).delete();
     this.isLike = false;
     notifyListeners();
+  }
+  Future sendComment(Post post,String text) async {
+    final user = await auth.currentUser();
+    db.collection('posts').document(post.postID).collection('comments').add({
+      'userID': user.uid,
+      'groupID': post.groupID,
+      'created': FieldValue.serverTimestamp(),
+      'postID': post.postID,
+      'text': text
+    });
+  }
+  Future commentsDelete(Comment comment,Post post) async {
+    await db.collection('posts').document(post.postID).collection('comments').document(comment.commentID).delete();
   }
 }
