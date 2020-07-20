@@ -261,3 +261,15 @@ exports.decrementGroupUser= functions.firestore.document('users/{userID}/belongi
     UserCount: FieldValue.increment(-1)
   });
 })
+exports.incrementComment = functions.firestore.document('posts/{postID}/comments/{commentID}').onCreate((snap,context) => {
+  const postID = context.params.postID;
+  return db.collection('posts').doc(postID).update({
+     commentCounts: FieldValue.increment(1)
+  });
+})
+exports.decrementComment = functions.firestore.document('posts/{postID}/comments/{commentID}').onDelete((snap,context) => {
+  const postID = context.params.postID;
+  return db.collection('posts').doc(postID).update({
+     commentCounts: FieldValue.increment(-1)
+  });
+})

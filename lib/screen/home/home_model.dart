@@ -104,7 +104,7 @@ class HomeModel extends ChangeNotifier {
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
     final ids = likePost.documents.map((doc) => doc.documentID);
     final bool isLike = ids.contains(id);
-    final post = Post(name:doc['name'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike);
+    final post = Post(name:doc['name'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike,commentCounts: doc['commentCounts']);
     print(post.name);
     return post;
   }
@@ -119,6 +119,7 @@ class HomeModel extends ChangeNotifier {
     });
     final List<Comment> results = await Future.wait(tasks);
     this.postComments = results;
+    this.loading = true;
     notifyListeners();
   }
   Future<Comment> _fetchPostComments(String id,List<String> ids) async {
@@ -127,10 +128,6 @@ class HomeModel extends ChangeNotifier {
     final comment = Comment(postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: doc['created'],isGroupUser: isGroupUser);
     return comment;
   }
-  
-
-
-
   // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
   Future<Group> _fetchGroup(String groupId) async {
     final doc = await db.collection('groups').document(groupId).get();
@@ -139,8 +136,6 @@ class HomeModel extends ChangeNotifier {
         userCount:doc['UserCount'], follower:doc['Follower']);
     return group;
   }
-
-
   // いいねの処理
   Future likePost(Post post) async {
     final user = await auth.currentUser();
@@ -154,7 +149,6 @@ class HomeModel extends ChangeNotifier {
       'postID': post.postID,
       'group' : post.groupID,
     });
-
   }
   // いいね解除したときの処理
   Future unLikePost(Post post) async {
