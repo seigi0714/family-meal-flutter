@@ -15,7 +15,7 @@ class GroupSearch extends StatelessWidget {
         ),
         body: Consumer<GroupModel>(builder: (context, model, child) {
           TextEditingController _searchText = TextEditingController(text: "");
-          final groups = model.groups;
+          final groups = model.groups.where((group) => group.isHidden != true).toList();
           return ListView(
             children: <Widget>[
               TextField(
@@ -34,11 +34,11 @@ class GroupSearch extends StatelessWidget {
               ),
               Expanded(
                   child: model.searching == true
-                      ? model.groups.length == 0
+                      ? groups.length == 0
                           ? Center(
                               child: Text("該当する投稿が見つかりませんでした"),
                             )
-                          : GroupList(groups: model.groups)
+                          : GroupList(groups: groups)
                       : Center(
                           child: Text("Searching, please wait..."),
                         )),

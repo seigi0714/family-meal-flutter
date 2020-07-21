@@ -112,8 +112,8 @@ class UserList extends StatelessWidget {
                                )
                               : FlatButton(
                                   color: Colors.amber,
-                                  onPressed: () {
-                                    model.invUser(user.userID,group.groupID);
+                                  onPressed: () async {
+                                    await inv(model,context,user.userID,group.groupID);
                                   },
                                   child: Text(
                                     '招待',
@@ -139,6 +139,45 @@ class UserList extends StatelessWidget {
             );
           }
         )
+    );
+  }
+}
+Future inv(UserModel model, BuildContext context,String userID, String groupID) async {
+  try {
+    await model.invUser(userID,groupID);
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('招待しました'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    Navigator.pop(context);
+  } catch (e) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(e.toString()),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

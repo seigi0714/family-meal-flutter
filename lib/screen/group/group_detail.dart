@@ -24,230 +24,259 @@ class GroupDetail extends StatelessWidget {
       create: (_) => GroupModel()..getGroups(group.groupID),
       child: Consumer<GroupModel>(builder: (context, model, child) {
         return model.loading
-            ? Scaffold(
-                appBar: AppBar(
-                  title: Text(
-                    model.group.name,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  actions: <Widget>[
-                    model.group.isBelong
-                        ? IconButton(
-                            padding: EdgeInsets.all(0),
-                            onPressed: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return PostAdd(group: model.group);
-                                  },
-                                ),
-                              );
-                              model.getGroups(model.group.groupID);
-                            },
-                            icon: Icon(
-                              Icons.edit,
-                              color: Colors.white,
-                            ))
-                        : Container(),
-                    popUpMenu(model, context, group)
-                  ],
-                ),
-                body: Consumer<GroupModel>(builder: (context, model, child) {
-                  final List<Post> posts = model.posts;
-                  final imageList = posts
-                      .map((post) => Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black),
-                              image: DecorationImage(
-                                image: NetworkImage(post.imageURL),
-                                fit: BoxFit.fill,
-                              ),
-                            ),
+            ? model.group.isHidden
+                ? Scaffold(
+                    appBar: AppBar(
+                      title: Text('非表示'),
+                    ),
+                    body: Container(
+                        child: Row(children: <Widget>[
+                      Text('このグループを非表示にしています！'),
+                      FlatButton(
+                          onPressed: () async {
+                            await model.unHidden(model.group.groupID);
+                            await model.getGroups(group.groupID);
+                          },
+                          child: Text(
+                            '非表示を解除',
+                            style: TextStyle(color: Colors.indigo),
                           ))
-                      .toList();
-                  return ListView(children: <Widget>[
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      height: 100,
-                      width: double.infinity,
-                      padding: EdgeInsets.only(
-                        left: 15,
+                    ])),
+                  )
+                : Scaffold(
+                    appBar: AppBar(
+                      title: Text(
+                        model.group.name,
+                        style: TextStyle(color: Colors.white),
                       ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Container(
-                              height: 90.0,
-                              width: 90.0,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: NetworkImage(model.group.iconURL)),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 30,
-                            ),
-                            FlatButton(
+                      actions: <Widget>[
+                        model.group.isBelong
+                            ? IconButton(
+                                padding: EdgeInsets.all(0),
                                 onPressed: () async {
                                   await Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (context) {
-                                        return GroupFollower(group: group);
+                                        return PostAdd(group: model.group);
                                       },
                                     ),
                                   );
+                                  model.getGroups(model.group.groupID);
                                 },
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(
-                                      model.group.follower.toString(),
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    Text(
-                                      'フォロワー',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                      ),
-                                    )
-                                  ],
-                                )),
-                            FlatButton(
-                                onPressed: () async {
-                                  await Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return GroupMember(group: group);
-                                      },
-                                    ),
-                                  );
-                                },
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(
-                                      model.group.userCount.toString(),
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    Text(
-                                      'メンバー',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ],
+                                icon: Icon(
+                                  Icons.edit,
+                                  color: Colors.white,
                                 ))
-                          ],
+                            : Container(),
+                        popUpMenu(model, context, group)
+                      ],
+                    ),
+                    body:
+                        Consumer<GroupModel>(builder: (context, model, child) {
+                      final List<Post> posts = model.posts;
+                      final imageList = posts
+                          .map((post) => Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.black),
+                                  image: DecorationImage(
+                                    image: NetworkImage(post.imageURL),
+                                    fit: BoxFit.fill,
+                                  ),
+                                ),
+                              ))
+                          .toList();
+                      return ListView(children: <Widget>[
+                        SizedBox(
+                          height: 20,
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      model.group.name,
-                      style: TextStyle(
-                        fontSize: 30,
-                      ),
-                    ),
-                    Text(
-                      model.group.text,
-                      style: TextStyle(fontSize: 15, color: Colors.grey),
-                    ),
-                    (model.group.isBelong)
-                        ? Column(
-                            children: <Widget>[
-                              Container(
-                                child: FlatButton(
+                        Container(
+                          height: 100,
+                          width: double.infinity,
+                          padding: EdgeInsets.only(
+                            left: 15,
+                          ),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: <Widget>[
+                                Container(
+                                  height: 90.0,
+                                  width: 90.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image:
+                                            NetworkImage(model.group.iconURL)),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 30,
+                                ),
+                                FlatButton(
                                     onPressed: () async {
                                       await Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (context) {
-                                            return GroupAdd(group: model.group);
+                                            return GroupFollower(group: group);
                                           },
                                         ),
                                       );
-                                      model.getGroups(model.group.groupID);
+                                    },
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text(
+                                          model.group.follower.toString(),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          'フォロワー',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                          ),
+                                        )
+                                      ],
+                                    )),
+                                FlatButton(
+                                    onPressed: () async {
+                                      await Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) {
+                                            return GroupMember(group: group);
+                                          },
+                                        ),
+                                      );
+                                    },
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Text(
+                                          model.group.userCount.toString(),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        Text(
+                                          'メンバー',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                      ],
+                                    ))
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          model.group.name,
+                          style: TextStyle(
+                            fontSize: 30,
+                          ),
+                        ),
+                        Text(
+                          model.group.text,
+                          style: TextStyle(fontSize: 15, color: Colors.grey),
+                        ),
+                        (model.group.isBelong)
+                            ? Column(
+                                children: <Widget>[
+                                  Container(
+                                    child: FlatButton(
+                                        onPressed: () async {
+                                          await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) {
+                                                return GroupAdd(
+                                                    group: model.group);
+                                              },
+                                            ),
+                                          );
+                                          model.getGroups(model.group.groupID);
+                                        },
+                                        child: Text(
+                                          'プロフィール編集',
+                                          style:
+                                              TextStyle(color: Colors.indigo),
+                                        )),
+                                  ),
+                                  RaisedButton(
+                                      child: Text(
+                                        "メンバーを招待",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      color: Colors.amber,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      onPressed: () async {
+                                        await Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              return Invitation(
+                                                  group: model.group);
+                                            },
+                                          ),
+                                        );
+                                      }),
+                                ],
+                              )
+                            : (model.isFollow)
+                                ? FlatButton(
+                                    onPressed: () async {
+                                      model.isFollow = false;
+                                      await model
+                                          .unFollowGroup(model.group.groupID);
                                     },
                                     child: Text(
-                                      'プロフィール編集',
+                                      'フォローを解除',
+                                      style: TextStyle(color: Colors.indigo),
+                                    ))
+                                : FlatButton(
+                                    onPressed: () async {
+                                      model.isFollow = true;
+                                      await model
+                                          .followGroup(model.group.groupID);
+                                    },
+                                    child: Text(
+                                      'グループをフォロー',
                                       style: TextStyle(color: Colors.indigo),
                                     )),
-                              ),
-                              RaisedButton(
-                                  child: Text(
-                                    "メンバーを招待",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  color: Colors.amber,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  onPressed: () async {
-                                    await Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          return Invitation(group: model.group);
-                                        },
-                                      ),
-                                    );
-                                  }),
-                            ],
-                          )
-                        : (model.isFollow)
-                            ? FlatButton(
-                                onPressed: () async {
-                                  model.isFollow = false;
-                                  await model
-                                      .unFollowGroup(model.group.groupID);
-                                },
-                                child: Text(
-                                  'フォローを解除',
-                                  style: TextStyle(color: Colors.indigo),
-                                ))
-                            : FlatButton(
-                                onPressed: () async {
-                                  model.isFollow = true;
-                                  await model.followGroup(model.group.groupID);
-                                },
-                                child: Text(
-                                  'グループをフォロー',
-                                  style: TextStyle(color: Colors.indigo),
-                                )),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Container(
-                      height: 40,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          border: Border.symmetric(
-                              vertical: BorderSide(color: Colors.grey))),
-                      child: Center(
-                        child: Text(
-                          '投稿一覧',
-                          style: TextStyle(fontSize: 30, color: Colors.grey),
+                        SizedBox(
+                          height: 10,
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    ImageList(group: model.group)
-                  ]);
-                }))
+                        Container(
+                          height: 40,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              border: Border.symmetric(
+                                  vertical: BorderSide(color: Colors.grey))),
+                          child: Center(
+                            child: Text(
+                              '投稿一覧',
+                              style:
+                                  TextStyle(fontSize: 30, color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        ImageList(group: model.group)
+                      ]);
+                    }))
             : Container(
                 child: Center(
                   child: CircularProgressIndicator(),

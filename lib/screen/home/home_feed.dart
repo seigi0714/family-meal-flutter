@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
         create: (_) => HomeModel()..fetchFeedPost(),
         child: Consumer<HomeModel>(builder: (context, model, child) {
           final groups = model.belongGroup;
-          final posts = model.userPost;
+          final posts = model.userPost.where((post) => post.isHidden != true).toList();
           return Scaffold(
               appBar: AppBar(
                 title: Text(
@@ -298,14 +298,13 @@ Future reportGroup(HomeModel model, BuildContext context, Group group) async {
             FlatButton(
               child: Text('OK'),
               onPressed: () {
-                model.fetchFeedPost();
+                Navigator.pop(context);
               },
             ),
           ],
         );
       },
     );
-    Navigator.of(context).pop();
   } catch (e) {
     showDialog(
       context: context,
@@ -325,7 +324,6 @@ Future reportGroup(HomeModel model, BuildContext context, Group group) async {
     );
   }
 }
-
 Future hiddenGroup(HomeModel model, BuildContext context, Group group) async {
   try {
     await model.hiddenGroup(group);
@@ -339,13 +337,13 @@ Future hiddenGroup(HomeModel model, BuildContext context, Group group) async {
               child: Text('OK'),
               onPressed: () {
                 model.fetchFeedPost();
+                Navigator.of(context).pop();
               },
             ),
           ],
         );
       },
     );
-    Navigator.of(context).pop();
   } catch (e) {
     showDialog(
       context: context,

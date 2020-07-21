@@ -1,5 +1,5 @@
 class Group {
-  Group({this.groupID,this.name, this.text, this.iconURL, this.userID,this.userCount,this.follower,this.postIds,this.isBelong,this.isFollow});
+  Group({this.groupID,this.name, this.text, this.iconURL, this.userID,this.userCount,this.follower,this.postIds,this.isBelong,this.isFollow,this.isHidden});
  String groupID;
   String name;
   String text;
@@ -10,4 +10,5 @@ class Group {
   List postIds;
   bool isBelong;
   bool isFollow;
+  bool isHidden;
 }

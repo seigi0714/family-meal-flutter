@@ -100,9 +100,12 @@ class HomeModel extends ChangeNotifier {
     final user = await auth.currentUser();
     final doc = await db.collection('posts').document(id).get();
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
-    final ids = likePost.documents.map((doc) => doc.documentID);
+    final hiddenGroup = await db.collection('users').document(user.uid).collection('hiddenGroups').getDocuments();
+    final hiddenIds = hiddenGroup.documents.map((doc) => doc.documentID).toList();
+    final ids = likePost.documents.map((doc) => doc.documentID).toList();
+    final bool isHidden = hiddenIds.contains(doc['GroupID']);
     final bool isLike = ids.contains(id);
-    final post = Post(name:doc['name'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike);
+    final post = Post(name:doc['name'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike,isHidden: isHidden);
     print(post.name);
     return post;
   }

@@ -87,6 +87,8 @@ class GroupModel extends ChangeNotifier {
         .document(uid)
         .collection('followGroup')
         .getDocuments();
+    final hiddenDoc = await db.collection('users').document(uid).collection('hiddenGroups').document(groupId).get();
+    final isHidden = hiddenDoc.exists;
     final followIds = followDoc.documents.map((doc) => doc.documentID).toList();
     final bool isFollow = followIds.contains(groupId);
     try {
@@ -110,7 +112,9 @@ class GroupModel extends ChangeNotifier {
         userCount: doc['UserCount'],
         follower: doc['Follower'],
         isBelong: true,
-        isFollow: isFollow);
+        isFollow: isFollow,
+        isHidden: isHidden
+    );
     print(group.name);
     notifyListeners();
     return group;
@@ -123,6 +127,8 @@ class GroupModel extends ChangeNotifier {
     this.isFollow = isFollow;
     final belongDoc = await db.collection('users').document(user.uid).collection('belongingGroup').document(id).get();
     final isBelong = belongDoc.exists;
+    final hiddenGroup = await db.collection('users').document(user.uid).collection('hiddenGroups').document(id).get();
+    final isHidden = hiddenGroup.exists;
     final group = Group(groupID: doc.documentID,
       name: doc['name'],
       text: doc['text'],
@@ -131,9 +137,11 @@ class GroupModel extends ChangeNotifier {
       userCount: doc['UserCount'],
       follower: doc['Follower'],
       isBelong: isBelong,
-      isFollow: isFollow);
-    print(group.isFollow);
+      isFollow: isFollow,
+      isHidden: isHidden
+    );
     this.loading = true;
+    print(group.isHidden);
     this.group = group;
     notifyListeners();
     return group;
@@ -311,17 +319,18 @@ class GroupModel extends ChangeNotifier {
       'groupID': group.groupID
     });
   }
-
+  Future unHidden(String id) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenGroups').document(id).delete();
+  }
   void linkAddPage() {
     currentPageIndex = 1;
     notifyListeners();
   }
-
   void linkAddDetail() {
     currentPageIndex = 2;
     notifyListeners();
   }
-
   void goHome() {
     currentPageIndex = 0;
     fetchMyGroups();
