@@ -8,6 +8,7 @@ import 'package:weight/models/Group.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:weight/models/PopUpMenu.dart';
 import 'package:weight/models/Post.dart';
 import 'package:weight/models/user.dart';
 import 'package:weight/services/auth.dart';
@@ -296,8 +297,21 @@ class GroupModel extends ChangeNotifier {
   Future competition(Group group) async {
     final user = await auth.currentUser();
     await db.collection('users').document(user.uid).collection('belongingGroup').document(group.groupID).delete();
-
   }
+  Future reportGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('reports').add({
+      'reporter': user.uid,
+      'target': group.groupID
+    });
+  }
+  Future hiddenGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenGroups').document(group.groupID).setData({
+      'groupID': group.groupID
+    });
+  }
+
   void linkAddPage() {
     currentPageIndex = 1;
     notifyListeners();

@@ -106,9 +106,19 @@ class HomeModel extends ChangeNotifier {
     print(post.name);
     return post;
   }
-
-
-
+  Future reportGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('reports').add({
+      'reporter': user.uid,
+      'target': group.groupID
+    });
+  }
+  Future hiddenGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenGroups').document(group.groupID).setData({
+      'groupID': group.groupID
+    });
+  }
   // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
   Future<Group> _fetchGroup(String groupId) async {
     final doc = await db.collection('groups').document(groupId).get();
