@@ -65,7 +65,7 @@ class HomeModel extends ChangeNotifier {
     final groups = await Future.wait(tasks);
     Future.wait(getPosts);
    print(groups.toString());
-    this.belongGroup = groups;
+    this.belongGroup = groups.where((group) => group.isHidden != true);
     print(this.belongGroup);
     notifyListeners();
   }//
@@ -100,10 +100,9 @@ class HomeModel extends ChangeNotifier {
     final user = await auth.currentUser();
     final doc = await db.collection('posts').document(id).get();
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
-    final hiddenGroup = await db.collection('users').document(user.uid).collection('hiddenGroups').getDocuments();
-    final hiddenIds = hiddenGroup.documents.map((doc) => doc.documentID).toList();
+    final hiddenGroup = await db.collection('users').document(user.uid).collection('hiddenGroups').document(doc['GroupID']).get();
+    final isHidden = hiddenGroup.exists;
     final ids = likePost.documents.map((doc) => doc.documentID).toList();
-    final bool isHidden = hiddenIds.contains(doc['GroupID']);
     final bool isLike = ids.contains(id);
     final post = Post(name:doc['name'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike,isHidden: isHidden);
     print(post.name);

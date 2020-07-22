@@ -51,7 +51,7 @@ class GroupModel extends ChangeNotifier {
     print(documentIds.toString());
     final groups = await Future.wait(tasks);
     print(groups.toString());
-    this.groups = groups;
+    this.groups = groups.where((group) => group.isHidden != true);
     this.loading = true;
     notifyListeners();
   }
@@ -234,7 +234,7 @@ class GroupModel extends ChangeNotifier {
       return getGroups(id);
     }).toList();
     final groups = await Future.wait(tasks);
-    this.groups = groups;
+    this.groups = groups.where((group) => group.isHidden != true);
     print(groups.toString());
     this.searching = true;
     notifyListeners();

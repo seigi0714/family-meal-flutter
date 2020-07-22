@@ -121,7 +121,7 @@ exports.addGroup = functions.firestore.document('groups/{groupID}').onCreate((sn
 exports.copyPost = functions.https.onCall((data, context) =>{
   return userRef.doc(context.auth.uid).collection('feed').doc(data.postID).set({
       postID: data.postID,
-      created: FieldValue.serverTimestamp()
+      created:  admin.firestore.FieldValue.serverTimestamp(),
   });
 })
 exports.copyPostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onCreate((snap, context) => {
@@ -193,7 +193,8 @@ exports.addPost = functions.https.onCall((data, context) =>{
       created: admin.firestore.FieldValue.serverTimestamp(),
     }).then(function(docRef){
       return groupRef.doc(data.groupID).collection('posts').doc(docRef.id).set({
-        postID: docRef.id
+        postID: docRef.id,
+        created: admin.firestore.FieldValue.serverTimestamp(),
       })
     }).catch(function(error){
       throw console.error("Error adding document: ", error);
@@ -208,7 +209,7 @@ exports.followGroup = functions.firestore.document('users/{userID}/following/{gr
         return snap.forEach(function(doc){
             db.collection('users').doc(userID).collection('feed').doc(doc.id).set({
             postID: doc.id,
-            created: doc.created
+            created: doc.data().created,
           });
         });
     })

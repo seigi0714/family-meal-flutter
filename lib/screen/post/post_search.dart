@@ -213,11 +213,7 @@ class postActions extends StatelessWidget {
                   Text('300'),
                   SizedBox(
                     width: 20.0,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {},
-                  ),
+                  )
                 ],
               ),
             );

@@ -32,17 +32,19 @@ class PostModel extends ChangeNotifier{
       return _fetchMyPost(id);
     }).toList();
     final posts = await Future.wait(tasks);
-    this.posts = posts;
+    this.posts = posts.where((doc) => doc.isHidden != true);
     notifyListeners();
   }
 
   Future<Post> _fetchMyPost(String id) async {
     final user = await auth.currentUser();
     final doc = await db.collection('posts').document(id).get();
+    final hiddenDoc = await db.collection('users').document(user.uid).collection('hiddenGroup').document(doc['GroupID']).get();
+    final isHidden = hiddenDoc.exists;
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
     final ids = likePost.documents.map((doc) => doc.documentID);
     final bool isLike = ids.contains(id);
-    final posts = Post(name:doc['name'],text:doc['text'],postID:id, groupID:doc['GroupID'], created:doc['created'],imageURL:doc['imageURL'],likes:doc['like'],isLike:isLike);
+    final posts = Post(name:doc['name'],text:doc['text'],postID:id, groupID:doc['GroupID'], created:doc['created'],imageURL:doc['imageURL'],likes:doc['like'],isLike:isLike,isHidden: isHidden);
     this.isLike = isLike;
     return posts;
   }
