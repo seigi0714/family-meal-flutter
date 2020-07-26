@@ -137,12 +137,14 @@ class GroupAdd extends StatelessWidget {
                             elevation: 1.0,
                             shape: StadiumBorder(),
                             onPressed: () async {
+                              model.startLoading();
                               if (isUpdate) {
                                 await updateGroup(model, context, group);
                               } else {
                                 // firestoreに本を追加
                                 await addGroup(model, context);
                               }
+                              model.endLoading();
                             })),
                   ],
                 ),

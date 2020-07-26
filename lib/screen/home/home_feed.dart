@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
         create: (_) => HomeModel()..fetchFeedPost(),
         child: Consumer<HomeModel>(builder: (context, model, child) {
           final groups = model.belongGroup;
-          final posts = model.userPost.where((post) => post.isHidden != true).toList();
+          final posts = model.userPost;
           return Scaffold(
               appBar: AppBar(
                 title: Text(

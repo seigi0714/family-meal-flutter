@@ -51,7 +51,7 @@ class GroupModel extends ChangeNotifier {
     print(documentIds.toString());
     final groups = await Future.wait(tasks);
     print(groups.toString());
-    this.groups = groups.where((group) => group.isHidden != true);
+    this.groups = groups.where((group) => group.isHidden != true).toList();
     this.loading = true;
     notifyListeners();
   }
@@ -234,7 +234,7 @@ class GroupModel extends ChangeNotifier {
       return getGroups(id);
     }).toList();
     final groups = await Future.wait(tasks);
-    this.groups = groups.where((group) => group.isHidden != true);
+    this.groups = groups.where((group) => group.isHidden != true).toList();
     print(groups.toString());
     this.searching = true;
     notifyListeners();
@@ -281,10 +281,17 @@ class GroupModel extends ChangeNotifier {
       'invitationAt': FieldValue.serverTimestamp(),
     });
   }
+  startLoading() {
+    loading = true;
+    notifyListeners();
+  }
+
+  endLoading() {
+    loading = false;
+    notifyListeners();
+  }
 
   Future addGroup() async {
-    this.loading = true;
-    notifyListeners();
     if (currentGroupName.isEmpty){
       throw('グループ名を入力してください');
     }
@@ -299,7 +306,6 @@ class GroupModel extends ChangeNotifier {
       'Founder': user.uid,
       'created': FieldValue.serverTimestamp()
    });
-    this.loading = false;
     notifyListeners();
   }
   Future competition(Group group) async {

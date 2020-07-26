@@ -21,7 +21,7 @@ class InvList extends StatelessWidget {
         ),
         body: Consumer<UserModel>(builder: (context, model, child) {
           return model.loading
-              ? InvListView(context: context, model: model)
+              ? InvListView(context: context, model: model,uid: uid)
               : Container();
         }),
       ),
@@ -31,9 +31,7 @@ class InvList extends StatelessWidget {
 
 class GroupIcon extends StatelessWidget {
   GroupIcon({this.groupID});
-
   final String groupID;
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(
@@ -79,10 +77,11 @@ class GroupName extends StatelessWidget {
 }
 
 class InvListView extends StatelessWidget {
-  InvListView({this.context, this.model});
+  InvListView({this.context, this.model,this.uid});
 
   final BuildContext context;
   final UserModel model;
+  final String uid;
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +113,7 @@ class InvListView extends StatelessWidget {
                                   ),
                                   onPressed: () async {
                                     await model.join(inv.groupID);
+                                    await model.getInv(uid);
                                   }),
                               IconButton(
                                   icon: Icon(
@@ -122,6 +122,7 @@ class InvListView extends StatelessWidget {
                                   ),
                                   onPressed: () async {
                                     await model.chancel(inv.groupID);
+                                    await model.getInv(uid);
                                   })
                             ],
                           ),

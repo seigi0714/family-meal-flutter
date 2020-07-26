@@ -65,7 +65,7 @@ class HomeModel extends ChangeNotifier {
     final groups = await Future.wait(tasks);
     Future.wait(getPosts);
    print(groups.toString());
-    this.belongGroup = groups.where((group) => group.isHidden != true);
+    this.belongGroup = groups.where((group) => group.isHidden != true).toList();
     print(this.belongGroup);
     notifyListeners();
   }//
@@ -79,7 +79,7 @@ class HomeModel extends ChangeNotifier {
       return _fetchMyPost(id);
     }).toList();
     final List<Post> results = await Future.wait(tasks);
-    this.userPost = results;
+    this.userPost = results.where((group) => group.isHidden != true).toList();
     this.loading = true;
     notifyListeners();
   }
@@ -91,7 +91,7 @@ class HomeModel extends ChangeNotifier {
     }).toList();
     final List<Post> results = await Future.wait(tasks);
     print(results.toString());
-    this.userPost = results;
+    this.userPost = results.where((group) => group.isHidden != true).toList();
     this.loading = true;
     notifyListeners();
   }

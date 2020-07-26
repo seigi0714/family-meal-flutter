@@ -32,7 +32,7 @@ class PostModel extends ChangeNotifier{
       return _fetchMyPost(id);
     }).toList();
     final posts = await Future.wait(tasks);
-    this.posts = posts.where((doc) => doc.isHidden != true);
+    this.posts = posts.where((doc) => doc.isHidden != true).toList();
     notifyListeners();
   }
 
@@ -96,7 +96,7 @@ class PostModel extends ChangeNotifier{
       return _fetchMyPost(id);
     }).toList();
     final posts = await Future.wait(tasks);
-    this.posts = posts;
+    this.posts = posts.where((doc) => doc.isHidden != true).toList();
     print(posts.toString());
     this.searching = false;
     notifyListeners();
@@ -108,7 +108,7 @@ class PostModel extends ChangeNotifier{
       return _fetchMyPost(id);
     }).toList();
     final likePost = await Future.wait(tasks);
-    this.posts = likePost;
+    this.posts = likePost.where((doc) => doc.isHidden != true).toList();
     notifyListeners();
   }
   // いいねの処理
