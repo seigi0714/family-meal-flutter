@@ -6,8 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:weight/models/Comment.dart';
 import 'package:weight/models/Group.dart';
 import 'package:weight/models/Post.dart';
+import 'package:weight/models/user.dart';
 
 class PostModel extends ChangeNotifier{
   final db = Firestore.instance;
@@ -17,11 +19,14 @@ class PostModel extends ChangeNotifier{
   String currentPostName = "";
   String currentPostInfo = "";
   String profileURL = "";
-
+  String commentText = "";
+  List<Comment> postComments = [];
   File currentImage;
+  bool loading = true;
   bool searching = true;
   bool isLike = false;
   List<Post> posts = [];
+  User user;
 
   Future fetchPost(Group group)async {
     final FirebaseUser user = await auth.currentUser();
@@ -35,7 +40,31 @@ class PostModel extends ChangeNotifier{
     this.posts = posts.where((doc) => doc.isHidden != true).toList();
     notifyListeners();
   }
-
+  Future fetchPostComments(Post post) async {
+    final user = await auth.currentUser();
+    final doc = await db.collection('posts').document(post.postID).collection('comments').getDocuments();
+    final groupUsers = await db.collection('groups').document(post.groupID).collection('groupUsers').getDocuments();
+    final List<String> userIds = groupUsers.documents.map((doc) => doc.documentID).toList();
+    final List<String> commentIds = doc.documents.map((doc) => doc.documentID).toList();
+    List<Future<Comment>> tasks = commentIds.map((id) async {
+      return _fetchPostComments(id,userIds,post.postID,user.uid);
+    }).toList();
+    final List<Comment> results = await Future.wait(tasks);
+    this.postComments = results;
+    this.loading = true;
+    notifyListeners();
+  }
+  Future<Comment> _fetchPostComments(String id,List<String> ids,String postID,String uid) async {
+    final doc = await db.collection('posts').document(postID).collection('comments').document(id).get();
+    final bool isGroupUser = ids.contains(doc['userID']);
+    final bool isMine = doc['userID'] == uid;
+    final DateTime created = doc['created'].toDate();
+    final hiddenUser = await db.collection('users').document(uid).collection('hiddenUsers').document(doc['userID']).get();
+    final bool isHidden = hiddenUser.exists;
+    print(isHidden);
+    final comment = Comment(commentID: doc.documentID,postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: created,isGroupUser: isGroupUser,isMine: isMine,isHidden: isHidden);
+    return comment;
+  }
   Future<Post> _fetchMyPost(String id) async {
     final user = await auth.currentUser();
     final doc = await db.collection('posts').document(id).get();
@@ -48,7 +77,13 @@ class PostModel extends ChangeNotifier{
     this.isLike = isLike;
     return posts;
   }
-
+  Future fetchUser(String id) async {
+    final doc = await db.collection('users').document(id).get();
+    final user = User(userID: id,name: doc['name'],iconURL: doc['iconURL']);
+    this.user = user;
+    this.loading = false;
+    notifyListeners();
+  }
   void imageSet(image){
     currentImage = image;
     notifyListeners();
@@ -70,6 +105,7 @@ class PostModel extends ChangeNotifier{
       'imageURL': imageURL,
       'GroupID' : groupID,
       'like': 0,
+      'commentCounts': 0,
       'created': FieldValue.serverTimestamp()
     }).then((docRef){
       function
@@ -134,5 +170,31 @@ class PostModel extends ChangeNotifier{
     db.collection('users').document(user.uid).collection('likePost').document(post.postID).delete();
     this.isLike = false;
     notifyListeners();
+  }
+  Future sendComment(Post post,String text) async {
+    final user = await auth.currentUser();
+    db.collection('posts').document(post.postID).collection('comments').add({
+      'userID': user.uid,
+      'groupID': post.groupID,
+      'created': FieldValue.serverTimestamp(),
+      'postID': post.postID,
+      'text': text
+    });
+  }
+  Future commentsDelete(Comment comment,Post post) async {
+    await db.collection('posts').document(post.postID).collection('comments').document(comment.commentID).delete();
+  }
+  Future reportUser(String userID) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('reportUsers').document(userID).setData({
+      'reporter': user.uid,
+      'target': userID
+    });
+  }
+  Future hiddenUser(String userID) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenUsers').document(userID).setData({
+      'userID': userID
+    });
   }
 }

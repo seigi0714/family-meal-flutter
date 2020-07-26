@@ -6,6 +6,7 @@ import 'package:weight/screen/User/user_model.dart';
 import 'package:weight/screen/group/group_detail.dart';
 import 'package:weight/screen/home/home.dart';
 import 'package:weight/screen/home/home_model.dart';
+import 'package:weight/screen/post/post_comment.dart';
 import 'package:weight/screen/post/post_search.dart';
 import 'package:weight/services/auth.dart';
 
@@ -61,27 +62,27 @@ class HomePage extends StatelessWidget {
                           ),
                         )
                       : ListView(
-                        children: <Widget>[
-                          Container(
-                            child: FlatButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => PostSearch()),
-                                );
-                              },
-                              child: Row(
-                                children: <Widget>[
-                                  Text('お気に入りの写真を見つけに行こう'),
-                                  Icon(Icons.search)
-                                ],
+                          children: <Widget>[
+                            Container(
+                              child: FlatButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PostSearch()),
+                                  );
+                                },
+                                child: Row(
+                                  children: <Widget>[
+                                    Text('お気に入りの写真を見つけに行こう'),
+                                    Icon(Icons.search)
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          PostList(posts: posts),
-                        ],
-                      )
+                            PostList(posts: posts),
+                          ],
+                        )
                   : Center(
                       child: Container(child: CircularProgressIndicator())));
         }));
@@ -90,7 +91,9 @@ class HomePage extends StatelessWidget {
 
 class PostList extends StatelessWidget {
   PostList({this.posts});
+
   List<Post> posts;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
@@ -104,20 +107,20 @@ class PostList extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      PostHeader(groupID: post.groupID,),
+                      PostHeader(
+                        groupID: post.groupID,
+                      ),
                       // postImage
                       (post.imageURL != null)
-                      ?Container(
-                        height: 500,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              fit: BoxFit.fill,
-                              image: NetworkImage(
-                                  post.imageURL
-                              )),
-                        ),
-                      )
-                      : Container(),
+                          ? Container(
+                              height: 500,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    fit: BoxFit.fill,
+                                    image: NetworkImage(post.imageURL)),
+                              ),
+                            )
+                          : Container(),
                       PostActions(post: post),
                       Padding(
                         padding:
@@ -134,7 +137,7 @@ class PostList extends StatelessWidget {
                             Text(post.text)
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ))
@@ -148,77 +151,74 @@ class PostList extends StatelessWidget {
     );
   }
 }
+
 class PostHeader extends StatelessWidget {
   PostHeader({this.groupID});
+
   final String groupID;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
       create: (_) => HomeModel()..getGroup(groupID),
-      child: Consumer<HomeModel>(
-        builder: (context,model,child) {
-          final group = model.group;
-          return
-            (model.loading)
+      child: Consumer<HomeModel>(builder: (context, model, child) {
+        final group = model.group;
+        return (model.loading)
             ? Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                InkWell(
-                    onTap: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return GroupDetail(group:group);
-                          },
-                        ),
-                      );
-                    },
-                  child: Row(
-                    children: <Widget>[
-                      // iconImage(group)
-                      (group.iconURL != null)
-                      ?
-                      Container(
-                        height: 40.0,
-                        width: 40.0,
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(
-                              fit: BoxFit.fill,
-                              image: new NetworkImage(
-                                  group.iconURL
-                              )),
-                        ),
-                      )
-                      : Container(),
-                      new SizedBox(
-                        width: 10.0,
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return GroupDetail(group: group);
+                            },
+                          ),
+                        );
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          // iconImage(group)
+                          (group.iconURL != null)
+                              ? Container(
+                                  height: 40.0,
+                                  width: 40.0,
+                                  decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: new DecorationImage(
+                                        fit: BoxFit.fill,
+                                        image: new NetworkImage(group.iconURL)),
+                                  ),
+                                )
+                              : Container(),
+                          new SizedBox(
+                            width: 10.0,
+                          ),
+                          // groupname
+                          Text(
+                            group.name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        ],
                       ),
-                      // groupname
-                      Text(
-                        group.name,
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      )
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                popUpMenu(model, context, group)
-              ],
-            ),
-          )
-                : Container();
-        }
-      ),
+              )
+            : Container();
+      }),
     );
   }
 }
 
-
 class PostActions extends StatelessWidget {
   PostActions({this.post});
+
   final Post post;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
@@ -232,7 +232,7 @@ class PostActions extends StatelessWidget {
               (post.isLike)
                   ? IconButton(
                       icon: Icon(
-                          Icons.star,
+                        Icons.star,
                         color: Colors.amber,
                       ),
                       onPressed: () async {
@@ -244,7 +244,7 @@ class PostActions extends StatelessWidget {
                     )
                   : IconButton(
                       icon: Icon(
-                          Icons.star_border,
+                        Icons.star_border,
                         color: Colors.amber,
                       ),
                       onPressed: () async {
@@ -256,8 +256,23 @@ class PostActions extends StatelessWidget {
                     ),
               Text(post.likes.toString()),
               SizedBox(
-                width: 20.0,
+                width: 10.0,
               ),
+              IconButton(
+                  icon: Icon(
+                      Icons.comment,
+                      color: Colors.amber),
+                onPressed: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return PostComment(post: post);
+                      },
+                    ),
+                  );
+                },
+              ),
+              Text(post.commentCounts.toString())
             ],
           ),
         );
