@@ -117,6 +117,7 @@ class PostAdd extends StatelessWidget {
                               String name = model.currentPostName;
                               String text = model.currentPostInfo;
                               File image = model.currentImage;
+
                               await model.uploadImage(image);
                               await model.addPost(
                                   name, text, model.profileURL, group.groupID);

@@ -67,7 +67,7 @@ class HomeModel extends ChangeNotifier {
     final groups = await Future.wait(tasks);
     Future.wait(getPosts);
    print(groups.toString());
-    this.belongGroup = groups;
+    this.belongGroup = groups.where((group) => group.isHidden != true).toList();
     print(this.belongGroup);
     notifyListeners();
   }//
@@ -81,7 +81,7 @@ class HomeModel extends ChangeNotifier {
       return _fetchMyPost(id);
     }).toList();
     final List<Post> results = await Future.wait(tasks);
-    this.userPost = results;
+    this.userPost = results.where((group) => group.isHidden != true).toList();
     this.loading = true;
     notifyListeners();
   }
@@ -93,7 +93,7 @@ class HomeModel extends ChangeNotifier {
     }).toList();
     final List<Post> results = await Future.wait(tasks);
     print(results.toString());
-    this.userPost = results;
+    this.userPost = results.where((group) => group.isHidden != true).toList();
     this.loading = true;
     notifyListeners();
   }
@@ -102,7 +102,9 @@ class HomeModel extends ChangeNotifier {
     final user = await auth.currentUser();
     final doc = await db.collection('posts').document(id).get();
     final likePost = await db.collection('users').document(user.uid).collection('likePost').getDocuments();
-    final ids = likePost.documents.map((doc) => doc.documentID);
+    final hiddenGroup = await db.collection('users').document(user.uid).collection('hiddenGroups').document(doc['GroupID']).get();
+    final isHidden = hiddenGroup.exists;
+    final ids = likePost.documents.map((doc) => doc.documentID).toList();
     final bool isLike = ids.contains(id);
     final post = Post(name:doc['name'],text:doc['text'],postID:doc.documentID, groupID:doc['GroupID'],imageURL:doc['imageURL'],created:doc['created'], likes:doc['like'],isLike:isLike,commentCounts: doc['commentCounts']);
     print(post.name);
@@ -127,6 +129,19 @@ class HomeModel extends ChangeNotifier {
     final bool isGroupUser = ids.contains(doc['userID']);
     final comment = Comment(postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: doc['created'],isGroupUser: isGroupUser);
     return comment;
+  }
+  Future reportGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('reports').add({
+      'reporter': user.uid,
+      'target': group.groupID
+    });
+  }
+  Future hiddenGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenGroups').document(group.groupID).setData({
+      'groupID': group.groupID
+    });
   }
   // groupIdを使ってgroupのオブジェクトを取得するメソッドを用意
   Future<Group> _fetchGroup(String groupId) async {

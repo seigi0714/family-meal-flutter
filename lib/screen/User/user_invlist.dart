@@ -5,7 +5,9 @@ import 'package:weight/screen/User/user_model.dart';
 
 class InvList extends StatelessWidget {
   InvList({this.uid});
+
   final String uid;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(
@@ -18,60 +20,8 @@ class InvList extends StatelessWidget {
           ),
         ),
         body: Consumer<UserModel>(builder: (context, model, child) {
-          final invitations = model.invs;
-          final invCard = invitations
-              .map(
-                (inv) => Container(
-                  child: Card(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical:8.0,horizontal: 0),
-                      child: ListTile(
-                        leading: Container(
-                            width: 60,
-                            height: 60,
-                            child: GroupIcon(groupID: inv.groupID)),
-                        title: Container(
-                            width: 50, child: GroupName(groupID: inv.groupID)),
-                        trailing: model.isSelect
-                        ? Container()
-                        : Container(
-                          width: 200,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                IconButton(
-                                    icon: Icon(
-                                        Icons.check,
-                                      color: Colors.green,
-                                    ),
-                                    onPressed: () async {
-                                      await model.join(inv.groupID);
-                                    }
-                                ),
-                                IconButton(
-                                    icon: Icon(
-                                        Icons.not_interested,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () async {
-                                      await model.chancel(inv.groupID);
-                                    }
-                                    )
-                              ],
-                            ),
-                        ),
-                        ),
-                    ),
-                  ),
-                ),
-              )
-              .toList();
           return model.loading
-              ? ListView(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  children: invCard,
-                )
+              ? InvListView(context: context, model: model,uid: uid)
               : Container();
         }),
       ),
@@ -81,9 +31,7 @@ class InvList extends StatelessWidget {
 
 class GroupIcon extends StatelessWidget {
   GroupIcon({this.groupID});
-
   final String groupID;
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(
@@ -124,6 +72,71 @@ class GroupName extends StatelessWidget {
                 child: CircularProgressIndicator(),
               );
       }),
+    );
+  }
+}
+
+class InvListView extends StatelessWidget {
+  InvListView({this.context, this.model,this.uid});
+
+  final BuildContext context;
+  final UserModel model;
+  final String uid;
+
+  @override
+  Widget build(BuildContext context) {
+    final invitations = model.invs;
+    final invCard = invitations
+        .map(
+          (inv) => Container(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 0),
+                child: ListTile(
+                  leading: Container(
+                      width: 60,
+                      height: 60,
+                      child: GroupIcon(groupID: inv.groupID)),
+                  title: Container(
+                      width: 50, child: GroupName(groupID: inv.groupID)),
+                  trailing: model.isSelect
+                      ? Container()
+                      : Container(
+                          width: 200,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              IconButton(
+                                  icon: Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                  ),
+                                  onPressed: () async {
+                                    await model.join(inv.groupID);
+                                    await model.getInv(uid);
+                                  }),
+                              IconButton(
+                                  icon: Icon(
+                                    Icons.not_interested,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    await model.chancel(inv.groupID);
+                                    await model.getInv(uid);
+                                  })
+                            ],
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        )
+        .toList();
+    return ListView(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      children: invCard,
     );
   }
 }

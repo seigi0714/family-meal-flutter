@@ -1,4 +1,5 @@
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:weight/screen/home/home.dart';
 import 'package:weight/services/auth.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +70,22 @@ class RegisterPage extends StatelessWidget {
                       },
                     ),
                     SizedBox(
-                      height: 50.0,
+                      height: 30.0,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        FlatButton(
+                            onPressed: _launchURL,
+                            child: Text(
+                                '利用規約',
+                              style: TextStyle(
+                                color: Colors.indigo
+                              ),
+                            )
+                        ),
+                        Text('に同意して')
+                      ],
                     ),
                     RaisedButton(
                       color: Colors.amber,
@@ -99,5 +115,14 @@ class RegisterPage extends StatelessWidget {
     } else {
       return Home();
     }
+  }
+}
+
+Future _launchURL() async {
+  const url = "https://note.com/seiboy/n/ncb21a811097e";
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not Launch $url';
   }
 }

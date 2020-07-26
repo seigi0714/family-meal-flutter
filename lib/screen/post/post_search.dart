@@ -47,7 +47,7 @@ class PostSearch extends StatelessWidget {
                     ? Center(
                   child: Text("該当する投稿が見つかりませんでした"),
                 )
-                    :PostList(posts:model.posts),
+                    :PostList(posts: model.posts),
               ),
             ],
           );
@@ -163,10 +163,6 @@ class PostHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: null,
-                  )
                 ],
               ),
             )
@@ -207,14 +203,10 @@ class postActions extends StatelessWidget {
 // いいねの処
                     },
                   ),
-                  Text('300'),
+                  Text(post.likes.toString()),
                   SizedBox(
                     width: 20.0,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.share),
-                    onPressed: () {},
-                  ),
+                  )
                 ],
               ),
             );

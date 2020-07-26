@@ -8,6 +8,7 @@ import 'package:weight/models/Group.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:weight/models/PopUpMenu.dart';
 import 'package:weight/models/Post.dart';
 import 'package:weight/models/user.dart';
 import 'package:weight/services/auth.dart';
@@ -50,7 +51,7 @@ class GroupModel extends ChangeNotifier {
     print(documentIds.toString());
     final groups = await Future.wait(tasks);
     print(groups.toString());
-    this.groups = groups;
+    this.groups = groups.where((group) => group.isHidden != true).toList();
     this.loading = true;
     notifyListeners();
   }
@@ -86,6 +87,8 @@ class GroupModel extends ChangeNotifier {
         .document(uid)
         .collection('followGroup')
         .getDocuments();
+    final hiddenDoc = await db.collection('users').document(uid).collection('hiddenGroups').document(groupId).get();
+    final isHidden = hiddenDoc.exists;
     final followIds = followDoc.documents.map((doc) => doc.documentID).toList();
     final bool isFollow = followIds.contains(groupId);
     try {
@@ -109,7 +112,9 @@ class GroupModel extends ChangeNotifier {
         userCount: doc['UserCount'],
         follower: doc['Follower'],
         isBelong: true,
-        isFollow: isFollow);
+        isFollow: isFollow,
+        isHidden: isHidden
+    );
     print(group.name);
     notifyListeners();
     return group;
@@ -122,6 +127,8 @@ class GroupModel extends ChangeNotifier {
     this.isFollow = isFollow;
     final belongDoc = await db.collection('users').document(user.uid).collection('belongingGroup').document(id).get();
     final isBelong = belongDoc.exists;
+    final hiddenGroup = await db.collection('users').document(user.uid).collection('hiddenGroups').document(id).get();
+    final isHidden = hiddenGroup.exists;
     final group = Group(groupID: doc.documentID,
       name: doc['name'],
       text: doc['text'],
@@ -130,9 +137,11 @@ class GroupModel extends ChangeNotifier {
       userCount: doc['UserCount'],
       follower: doc['Follower'],
       isBelong: isBelong,
-      isFollow: isFollow);
-    print(group.isFollow);
+      isFollow: isFollow,
+      isHidden: isHidden
+    );
     this.loading = true;
+    print(group.isHidden);
     this.group = group;
     notifyListeners();
     return group;
@@ -225,7 +234,7 @@ class GroupModel extends ChangeNotifier {
       return getGroups(id);
     }).toList();
     final groups = await Future.wait(tasks);
-    this.groups = groups;
+    this.groups = groups.where((group) => group.isHidden != true).toList();
     print(groups.toString());
     this.searching = true;
     notifyListeners();
@@ -272,10 +281,17 @@ class GroupModel extends ChangeNotifier {
       'invitationAt': FieldValue.serverTimestamp(),
     });
   }
+  startLoading() {
+    loading = true;
+    notifyListeners();
+  }
+
+  endLoading() {
+    loading = false;
+    notifyListeners();
+  }
 
   Future addGroup() async {
-    this.loading = true;
-    notifyListeners();
     if (currentGroupName.isEmpty){
       throw('グループ名を入力してください');
     }
@@ -290,24 +306,37 @@ class GroupModel extends ChangeNotifier {
       'Founder': user.uid,
       'created': FieldValue.serverTimestamp()
    });
-    this.loading = false;
     notifyListeners();
   }
   Future competition(Group group) async {
     final user = await auth.currentUser();
     await db.collection('users').document(user.uid).collection('belongingGroup').document(group.groupID).delete();
-
+  }
+  Future reportGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('reports').add({
+      'reporter': user.uid,
+      'target': group.groupID
+    });
+  }
+  Future hiddenGroup(Group group) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenGroups').document(group.groupID).setData({
+      'groupID': group.groupID
+    });
+  }
+  Future unHidden(String id) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenGroups').document(id).delete();
   }
   void linkAddPage() {
     currentPageIndex = 1;
     notifyListeners();
   }
-
   void linkAddDetail() {
     currentPageIndex = 2;
     notifyListeners();
   }
-
   void goHome() {
     currentPageIndex = 0;
     fetchMyGroups();

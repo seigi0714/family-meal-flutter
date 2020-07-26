@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:weight/models/user.dart';
 
 class Post {
-  Post({this.name,this.text,this.postID,this.groupID,this.imageURL,this.created,this.likes,this.isLike,this.commentCounts});
+  Post({this.name,this.text,this.postID,this.groupID,this.imageURL,this.created,this.likes,this.isLike,this.commentCounts,this.isHidden});
   String name;
   String text;
   String postID;
@@ -12,4 +12,5 @@ class Post {
   int likes;
   bool isLike;
   int commentCounts;
+  bool isHidden;
 }
