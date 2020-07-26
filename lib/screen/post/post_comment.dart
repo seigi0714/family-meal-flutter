@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:weight/models/Comment.dart';
 import 'package:weight/models/Post.dart';
@@ -16,18 +17,18 @@ class PostComment extends StatelessWidget {
         appBar: AppBar(title: Text('コメント')),
         body: ChangeNotifierProvider<PostModel>(
           create: (_) => PostModel()..fetchPostComments(post),
-          child: Consumer<PostModel>(builder: (context, model, child) {
-            TextEditingController _comment = TextEditingController(text: "");
-            return SingleChildScrollView(
-              reverse: true,
-              child: Column(
+          child: SingleChildScrollView(
+            reverse: true,
+            child: Consumer<PostModel>(builder: (context, model, child) {
+              TextEditingController _comment = TextEditingController(text: "");
+              return Column(
                 children: <Widget>[
-                  model.postComments == null
+                  model.postComments.length == 0
                       ? SizedBox(
                           height: 10,
                         )
-                      : commentList(context, model,post),
-                  Row(children: <Widget>[
+                      : commentList(context, model, post),
+                  Stack(children: <Widget>[
                     TextField(
                       controller: _comment,
                       decoration: InputDecoration(hintText: "コメントを入力してください"),
@@ -35,37 +36,70 @@ class PostComment extends StatelessWidget {
                         model.commentText = text;
                       },
                     ),
-                    RaisedButton(onPressed: () async {
-                      await addComments(model, context, post);
-                    })
+                    Positioned(
+                        right: 10,
+                        child: IconButton(
+                            icon: Icon(
+                              Icons.send,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () async {
+                              await addComments(model, context, post);
+                            }))
                   ])
                 ],
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ));
   }
 }
 
-Widget commentList(BuildContext context, PostModel model,Post post) {
-  final commentCards = model.postComments.map((comment) => Card(
-        child: ListTile(
-          leading: CommentUser(userID: comment.userID),
-          title: Text(comment.text),
-          trailing: IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () async {
-                await deleteComments(model, context, comment,post);
-              }),
-        ),
-      ));
-  return ListView();
+Widget commentList(BuildContext context, PostModel model, Post post) {
+  final commentCards = model.postComments
+      .map((comment) => Container(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      CommentUser(
+                        userID: comment.userID,
+                        created: comment.created,
+                      ),
+                      SizedBox(width: 10),
+                      Text(comment.text)
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      comment.isMine
+                          ? IconButton(
+                              icon: Icon(Icons.delete, color: Colors.grey),
+                              onPressed: () async {
+                                await deleteComments(
+                                    model, context, comment, post);
+                                await model.fetchPostComments(post);
+                              })
+                          : SizedBox(width: 10),
+                      popUpMenu(model, context, comment.userID)
+                    ],
+                  )
+                ]),
+          ))
+      .toList();
+  return ListView(
+    shrinkWrap: true,
+    physics: NeverScrollableScrollPhysics(),
+    children: commentCards,
+  );
 }
 
 class CommentUser extends StatelessWidget {
-  CommentUser({this.userID});
+  CommentUser({this.userID, this.created});
 
   final String userID;
+  final DateTime created;
 
   @override
   Widget build(BuildContext context) {
@@ -76,20 +110,35 @@ class CommentUser extends StatelessWidget {
             ? Center(
                 child: CircularProgressIndicator(),
               )
-            : Row(
-                children: <Widget>[
-                  Container(
-                    height: 60.0,
-                    width: 60.0,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          fit: BoxFit.fill,
-                          image: NetworkImage(model.user.iconURL)),
+            : Container(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      height: 40.0,
+                      width: 40.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            fit: BoxFit.fill,
+                            image: NetworkImage(model.user.iconURL)),
+                      ),
                     ),
-                  ),
-                  Text(model.user.name)
-                ],
+                    SizedBox(width: 10),
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            model.user.name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            DateFormat('yyyy/MM/dd').format(created),
+                            style: TextStyle(color: Colors.grey),
+                          )
+                        ])
+                  ],
+                ),
               );
       }),
     );
@@ -103,12 +152,116 @@ Future addComments(PostModel model, BuildContext context, Post post) async {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('保存しました！'),
+          title: Text('コメントしました！'),
           actions: <Widget>[
             FlatButton(
               child: Text('OK'),
               onPressed: () async {
                 await model.fetchPostComments(post);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  } catch (e) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(e.toString()),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+Future deleteComments(
+    PostModel model, BuildContext context, Comment comment, Post post) async {
+  try {
+    await model.commentsDelete(comment, post);
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('コメントを削除しました'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await model.fetchPostComments(post);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  } catch (e) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(e.toString()),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+Widget popUpMenu(PostModel model, BuildContext context, String userID) {
+  return PopupMenuButton<String>(
+    icon: Icon(
+        Icons.more_vert,
+      color: Colors.grey,
+    ),
+    onSelected: (String s) async {
+      if (s == '通報') {
+        await reportUser(model, context, userID);
+      } else {
+        await hiddenUser(model, context, userID);
+      }
+    },
+    itemBuilder: (BuildContext context) {
+      final List<String> _items = ['通報', '非表示'];
+      return _items.map((String s) {
+        return PopupMenuItem(
+          child: Text(s),
+          value: s,
+        );
+      }).toList();
+    },
+  );
+}
+Future reportUser(PostModel model, BuildContext context, String userID) async {
+  try {
+    await model.reportUser(userID);
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('通報'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -135,19 +288,20 @@ Future addComments(PostModel model, BuildContext context, Post post) async {
     );
   }
 }
-Future deleteComments(PostModel model, BuildContext context, Comment comment,Post post) async {
+
+Future hiddenUser(PostModel model, BuildContext context, String userID) async {
   try {
-    await model.commentsDelete(comment,post);
+    await model.hiddenUser(userID);
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('保存しました！'),
+          title: Text('ブロック'),
           actions: <Widget>[
             FlatButton(
               child: Text('OK'),
-              onPressed: () async {
-                await model.fetchPostComments(post);
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
           ],

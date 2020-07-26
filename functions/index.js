@@ -121,7 +121,7 @@ exports.addGroup = functions.firestore.document('groups/{groupID}').onCreate((sn
 exports.copyPost = functions.https.onCall((data, context) =>{
   return userRef.doc(context.auth.uid).collection('feed').doc(data.postID).set({
       postID: data.postID,
-      created: FieldValue.serverTimestamp()
+      created: admin.firestore.FieldValue.serverTimestamp()
   });
 })
 exports.copyPostForFollower = functions.firestore.document('groups/{groupID}/posts/{postID}').onCreate((snap, context) => {
@@ -251,25 +251,25 @@ exports.incrementGroupUser = functions.firestore.document('users/{userID}/belong
   const groupID = context.params.groupID;
   const userID = context.params.userID;
   return db.collection('groups').doc(groupID).update({
-    UserCount: FieldValue.increment(1)
+    UserCount: admin.firestore.FieldValue.increment(1)
   });
 })
-exports.decrementGroupUser= functions.firestore.document('users/{userID}/belongingGroup/{groupID}').onDelete((snap,context) => {
+exports.decrementGroupUser = functions.firestore.document('users/{userID}/belongingGroup/{groupID}').onDelete((snap,context) => {
   const groupID = context.params.groupID;
   const userID = context.params.userID;
   return db.collection('groups').doc(groupID).update({
-    UserCount: FieldValue.increment(-1)
+    UserCount: admin.firestore.FieldValue.increment(-1)
   });
 })
 exports.incrementComment = functions.firestore.document('posts/{postID}/comments/{commentID}').onCreate((snap,context) => {
   const postID = context.params.postID;
   return db.collection('posts').doc(postID).update({
-     commentCounts: FieldValue.increment(1)
+     commentCounts: admin.firestore.FieldValue.increment(1)
   });
 })
 exports.decrementComment = functions.firestore.document('posts/{postID}/comments/{commentID}').onDelete((snap,context) => {
   const postID = context.params.postID;
   return db.collection('posts').doc(postID).update({
-     commentCounts: FieldValue.increment(-1)
+     commentCounts: admin.firestore.FieldValue.increment(-1)
   });
 })

@@ -47,17 +47,22 @@ class PostModel extends ChangeNotifier{
     final List<String> userIds = groupUsers.documents.map((doc) => doc.documentID).toList();
     final List<String> commentIds = doc.documents.map((doc) => doc.documentID).toList();
     List<Future<Comment>> tasks = commentIds.map((id) async {
-      return _fetchPostComments(id,userIds,post.postID);
-    });
+      return _fetchPostComments(id,userIds,post.postID,user.uid);
+    }).toList();
     final List<Comment> results = await Future.wait(tasks);
     this.postComments = results;
     this.loading = true;
     notifyListeners();
   }
-  Future<Comment> _fetchPostComments(String id,List<String> ids,String postID) async {
+  Future<Comment> _fetchPostComments(String id,List<String> ids,String postID,String uid) async {
     final doc = await db.collection('posts').document(postID).collection('comments').document(id).get();
     final bool isGroupUser = ids.contains(doc['userID']);
-    final comment = Comment(commentID: doc['commentID'],postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: doc['created'],isGroupUser: isGroupUser);
+    final bool isMine = doc['userID'] == uid;
+    final DateTime created = doc['created'].toDate();
+    final hiddenUser = await db.collection('users').document(uid).collection('hiddenUsers').document(doc['userID']).get();
+    final bool isHidden = hiddenUser.exists;
+    print(isHidden);
+    final comment = Comment(commentID: doc.documentID,postID: doc['postID'],userID: doc['userID'],text: doc['text'],created: created,isGroupUser: isGroupUser,isMine: isMine,isHidden: isHidden);
     return comment;
   }
   Future<Post> _fetchMyPost(String id) async {
@@ -176,5 +181,18 @@ class PostModel extends ChangeNotifier{
   }
   Future commentsDelete(Comment comment,Post post) async {
     await db.collection('posts').document(post.postID).collection('comments').document(comment.commentID).delete();
+  }
+  Future reportUser(String userID) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('reportUsers').document(userID).setData({
+      'reporter': user.uid,
+      'target': userID
+    });
+  }
+  Future hiddenUser(String userID) async {
+    final user = await auth.currentUser();
+    await db.collection('users').document(user.uid).collection('hiddenUsers').document(userID).setData({
+      'userID': userID
+    });
   }
 }
