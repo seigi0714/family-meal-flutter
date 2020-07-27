@@ -11,11 +11,12 @@ class GroupSearch extends StatelessWidget {
       create: (_) => GroupModel(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('投稿検索'),
+          title: Text('グループ検索', style: TextStyle(color: Colors.white)),
         ),
         body: Consumer<GroupModel>(builder: (context, model, child) {
           TextEditingController _searchText = TextEditingController(text: "");
-          final groups = model.groups.where((group) => group.isHidden != true).toList();
+          final groups =
+              model.groups.where((group) => group.isHidden != true).toList();
           return ListView(
             children: <Widget>[
               TextField(
@@ -32,16 +33,15 @@ class GroupSearch extends StatelessWidget {
                   model.searchGroup(_searchText.text);
                 },
               ),
-              Expanded(
-                  child: model.searching == true
-                      ? groups.length == 0
-                          ? Center(
-                              child: Text("該当する投稿が見つかりませんでした"),
-                            )
-                          : GroupList(groups: groups)
-                      : Center(
-                          child: Text("Searching, please wait..."),
-                        )),
+              model.searching == true
+                  ? groups.length == 0
+                      ? Center(
+                          child: Text("該当する投稿が見つかりませんでした"),
+                        )
+                      : GroupList(groups: groups)
+                  : Center(
+                      child: Text("Searching, please wait..."),
+                    ),
             ],
           );
         }),
