@@ -38,17 +38,15 @@ class PostSearch extends StatelessWidget {
                   model.searchPost(_searchText.text);
                 },
               ),
-              Expanded(
-                child: model.searching == true
-                    ? Center(
-                  child: Text("Searching, please wait..."),
-                )
-                    : model.posts.length == 0
-                    ? Center(
-                  child: Text("該当する投稿が見つかりませんでした"),
-                )
-                    :PostList(posts: model.posts),
-              ),
+              model.searching == true
+                  ? Center(
+                      child: Text("Searching, please wait..."),
+                    )
+                  : model.posts.length == 0
+                      ? Center(
+                          child: Text("該当する投稿が見つかりませんでした"),
+                        )
+                      : PostList(posts: model.posts),
             ],
           );
         }),
@@ -56,166 +54,160 @@ class PostSearch extends StatelessWidget {
     );
   }
 }
+
 class PostList extends StatelessWidget {
   PostList({this.posts});
+
   final List<Post> posts;
+
   @override
   Widget build(BuildContext context) {
-    final postList = posts.map((post) => Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        PostHeader(groupID: post.groupID),
-        // postImage
-        Flexible(
-          fit: FlexFit.loose,
-          child: Image.network(
-            post.imageURL,
-            fit: BoxFit.cover,
-          ),
-        ),
-        postActions(post: post),
-        Padding(
-          padding:
-          EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-          child: Row(
+    final postList = posts
+        .map(
+          (post) => Column(
             mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              new Text(
-                post.name
+              PostHeader(groupID: post.groupID),
+              // postImage
+              Flexible(
+                fit: FlexFit.loose,
+                child: Image.network(
+                  post.imageURL,
+                  fit: BoxFit.cover,
+                ),
               ),
-              SizedBox(
-                width: 10.0,
-              ),
-              Text(post.text)
+              postActions(post: post),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    new Text(post.name),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    Text(post.text)
+                  ],
+                ),
+              )
             ],
           ),
         )
-      ],
-    ), ).toList();
+        .toList();
     return ChangeNotifierProvider<PostModel>(
       create: (_) => PostModel(),
-      child: Consumer<PostModel>(
-        builder: (context,model,child) {
-          return ListView(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            children: postList,
-          );
-        }
-      ),
+      child: Consumer<PostModel>(builder: (context, model, child) {
+        return ListView(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          children: postList,
+        );
+      }),
     );
   }
 }
 
 class PostHeader extends StatelessWidget {
   PostHeader({this.groupID});
+
   final String groupID;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
       create: (_) => HomeModel()..getGroup(groupID),
-      child: Consumer<HomeModel>(
-          builder: (context,model,child) {
-            final Group group = model.group;
-            return
-              (model.loading)
-              ?
-              Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  InkWell(
-                    onTap: () async {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return GroupDetail(group:group);
-                          },
-                        ),
-                      );
-                    },
-                    child: Row(
-                      children: <Widget>[
-                        // iconImage(group)
-                        Container(
-                          height: 40.0,
-                          width: 40.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                fit: BoxFit.fill,
-                                image: NetworkImage(
-                                    group.iconURL
-                                )),
+      child: Consumer<HomeModel>(builder: (context, model, child) {
+        final Group group = model.group;
+        return (model.loading)
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return GroupDetail(group: group);
+                            },
                           ),
-                        ),
-                        SizedBox(
-                          width: 10.0,
-                        ),
-                        // groupname
-                        Text(
-                          group.name,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )
-                      ],
+                        );
+                      },
+                      child: Row(
+                        children: <Widget>[
+                          // iconImage(group)
+                          Container(
+                            height: 40.0,
+                            width: 40.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image: NetworkImage(group.iconURL)),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 10.0,
+                          ),
+                          // groupname
+                          Text(
+                            group.name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )
+                  ],
+                ),
+              )
             : Container();
-          }
-      ),
+      }),
     );
   }
 }
 
 class postActions extends StatelessWidget {
   postActions({this.post});
+
   final Post post;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<PostModel>(
-      create: (_) =>PostModel(),
-      child: Consumer<PostModel>(
-          builder: (context, model, child) {
-            return Padding(
-              padding: EdgeInsets.all(0.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  (model.isLike)
-                      ? IconButton(
-                    icon: Icon(Icons.star),
-                    onPressed: () async {
-                      post.isLike = false;
-                      await model.unLikePost(post);
-                    },
-                  )
-                      : IconButton(
-                    icon: Icon(Icons.star_border),
-                    onPressed: () async {
-                      post.isLike = true;
-                      await model.likePost(post);
+      create: (_) => PostModel(),
+      child: Consumer<PostModel>(builder: (context, model, child) {
+        return Padding(
+          padding: EdgeInsets.all(0.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              (model.isLike)
+                  ? IconButton(
+                      icon: Icon(Icons.star),
+                      onPressed: () async {
+                        post.isLike = false;
+                        await model.unLikePost(post);
+                      },
+                    )
+                  : IconButton(
+                      icon: Icon(Icons.star_border),
+                      onPressed: () async {
+                        post.isLike = true;
+                        await model.likePost(post);
 // いいねの処
-                    },
-                  ),
-                  Text(post.likes.toString()),
-                  SizedBox(
-                    width: 20.0,
-                  )
-                ],
-              ),
-            );
-          }
-      ),
+                      },
+                    ),
+              Text(post.likes.toString()),
+              SizedBox(
+                width: 20.0,
+              )
+            ],
+          ),
+        );
+      }),
     );
   }
 }
-
-
-
-

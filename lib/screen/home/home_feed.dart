@@ -258,7 +258,7 @@ class PostActions extends StatelessWidget {
               SizedBox(
                 width: 10.0,
               ),
-              IconButton(
+              /*IconButton(
                   icon: Icon(
                       Icons.comment,
                       color: Colors.amber),
@@ -272,7 +272,7 @@ class PostActions extends StatelessWidget {
                   );
                 },
               ),
-              Text(post.commentCounts.toString())
+              Text(post.commentCounts.toString())*/
             ],
           ),
         );
