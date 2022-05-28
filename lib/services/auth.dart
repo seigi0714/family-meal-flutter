@@ -10,11 +10,15 @@ class AuthService {
   User _userFromFirebaseUser(FirebaseUser user) {
      return user != null ? User(userID: user.uid) : null;
   }
+
+  
 // userのログイン状況を表す⓵
   Stream<User> get user {
     return _auth.onAuthStateChanged
         .map((FirebaseUser user) => _userFromFirebaseUser(user));
   }
+
+
   // email&password register
    Future registerWithEmailAndPassword(String email,String name, String password) async {
        try {
